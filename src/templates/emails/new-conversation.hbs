@@ -1,0 +1,9 @@
+<h1 style="margin:0 0 16px;font-size:21px;">New chat waiting in {{workspaceName}}</h1>
+<p style="margin:0 0 12px;">A visitor started a conversation on <strong>{{websiteName}}</strong> and nobody has picked it up yet.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="margin:16px 0;width:100%;background:#f8fafc;border-radius:8px;">
+  <tr><td style="padding:16px;font-size:14px;line-height:1.6;">
+    <strong>{{visitorName}}</strong>{{#if visitorEmail}} &middot; {{visitorEmail}}{{/if}}<br />
+    <span style="color:#475569;">{{preview}}</span>
+  </td></tr>
+</table>
+{{> button url=conversationUrl label="Open conversation"}}
