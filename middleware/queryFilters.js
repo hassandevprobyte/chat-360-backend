@@ -1,0 +1,59 @@
+// Utilities
+const scopeQueryBuilder = require("../common/utils/scopeQueryBuilder");
+const transformQueryParams = require("../common/utils/transformQueryToMongooseSyntax");
+
+const orFilters = {};
+
+const queryFilters =
+  (modelName, extraFields = []) =>
+  (req, res, next) => {
+    if (req.method !== "GET") {
+      return next();
+    }
+
+    // const queryScope = scopeQueryBuilder(modelName, req.context?.user);
+    const queryScope = {};
+
+    const filters = transformQueryParams(
+      modelName,
+      {
+        ...queryScope,
+        ...(req.query.query || {}),
+        ...(req.context?.workspaceId && {
+          workspace: req.context?.workspaceId,
+        }),
+      },
+      ["$or", ...extraFields],
+      ["$or", "resource", "field"],
+    );
+
+    if (req.context?.workspaceId) {
+      filters.workspace = req.context.workspaceId;
+    }
+
+    const andConditions = [];
+
+    if (filters.$or) {
+      andConditions.push({ $or: filters.$or });
+
+      delete filters.$or;
+    }
+
+    Object.entries(orFilters).forEach(([key, builder]) => {
+      if (!filters[key]) return;
+
+      andConditions.push({ $or: builder(filters[key]) });
+
+      delete filters[key];
+    });
+
+    if (andConditions.length) {
+      filters.$and = andConditions;
+    }
+
+    req.filters = filters;
+    // console.dir({ middleware: "queryFilters", queryScope, filters: req.filters }, { depth: null }); // temp
+    next();
+  };
+
+module.exports = queryFilters;
