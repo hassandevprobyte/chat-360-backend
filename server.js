@@ -35,9 +35,7 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 
 app.use(pagination);
-
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use("/api/v1/auth", require("./modules/auth/auth.route"));
 app.use("/api/v1", require("./modules"));
 
 app.use((req, res) => {
@@ -57,18 +55,14 @@ const start = async () => {
 
   initRealtime(server);
 
-  ["SIGINT", "SIGTERM"].forEach((signal) => {
-    process.on(signal, () => shutdown(server, signal));
-  });
+  ["SIGINT", "SIGTERM", "unhandledRejection", "uncaughtException"].forEach((event) => {
+    process.on(event, (err) => {
+      if (err) {
+        console.error(event.bgRed.white, err);
+      }
 
-  process.on("unhandledRejection", (err) => {
-    console.error("Unhandled rejection".bgRed.white, err);
-    shutdown(server, "unhandledRejection");
-  });
-
-  process.on("uncaughtException", (err) => {
-    console.error("Uncaught exception".bgRed.white, err);
-    shutdown(server, "uncaughtException");
+      shutdown(server, event);
+    });
   });
 
   await new Promise((resolve, reject) => {

@@ -32,7 +32,7 @@ exports.getWorkspacesWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/workspaces/:id
 // @access  Private
 exports.getWorkspaceById = asyncHandler(async (req, res) => {
-  const data = await workspaceService.getWorkspaceById(req?.context?.workspaceId || req.params.id);
+  const data = await workspaceService.getWorkspaceById(req?.context?.workspace?._id);
 
   res.status(200).json(data);
 });
@@ -45,7 +45,6 @@ exports.createWorkspace = asyncHandler(async (req, res) => {
     user: req.context?.user?._id,
     title: req.body.title,
     description: req.body.description,
-    color: req.body.color,
     status: req.body.status,
     agents: req.body.agents,
     settings: req.body.settings,
@@ -61,10 +60,9 @@ exports.createWorkspace = asyncHandler(async (req, res) => {
 // @access  Private
 exports.updateWorkspace = asyncHandler(async (req, res) => {
   const payload = {
-    id: req?.context?.workspaceId || req.params.id,
+    id: req?.context?.workspace?._id || req.params.id,
     title: req.body.title,
     description: req.body.description,
-    color: req.body.color,
     status: req.body.status,
     agents: req.body.agents,
     settings: req.body.settings,
@@ -79,7 +77,7 @@ exports.updateWorkspace = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/workspaces/:id
 // @access  Private
 exports.deleteWorkspace = asyncHandler(async (req, res) => {
-  const data = await workspaceService.deleteWorkspace(req.params.id);
+  const data = await workspaceService.deleteWorkspace(req?.context?.workspace?._id || req.params.id);
 
   res.status(200).json(data);
 });

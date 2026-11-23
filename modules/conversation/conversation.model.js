@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Constants
-const { CONVERSATION_STATUS, CONVERSATION_PRIORITY, MODELS } = require("../../common/constants");
+const { CONVERSATION_PRIORITY, MODELS, STATUSES } = require("../../common/constants");
 
 const lastMessagePreviewSchema = {
   _id: false,
@@ -63,8 +63,8 @@ const schema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: Object.values(CONVERSATION_STATUS),
-      default: CONVERSATION_STATUS.OPEN,
+      enum: Object.values(STATUSES.CONVERSATION),
+      default: STATUSES.CONVERSATION.OPEN,
     },
     priority: {
       type: String,
@@ -82,7 +82,7 @@ const schema = new mongoose.Schema(
     },
     lastMessage: {
       type: lastMessagePreviewSchema,
-      default: () => ({}),
+      default: {},
     },
     lastMessageAt: {
       type: Date,

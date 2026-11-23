@@ -1,36 +1,40 @@
 const Boom = require("@hapi/boom");
 
 // Constants
-const { MESSAGE: message, ROLES } = require("../common/constants");
+const { MESSAGE, PERMISSIONS, PLATFORM_ROLES } = require("../common/constants");
 
 const METHOD_TO_ACTION = Object.freeze({
-  GET: "read",
-  POST: "create",
-  PUT: "update",
-  PATCH: "update",
-  DELETE: "delete",
+  GET: "READ",
+  POST: "CREATE",
+  PUT: "UPDATE",
+  PATCH: "UPDATE",
+  DELETE: "DELETE",
 });
 
 const checkPermissions = (resource) => (req, res, next) => {
-  const { user, permissions = [] } = req.context || {};
+  const { user, workspaceAccess } = req.context;
 
-  if (user.platformRole === ROLES.PLATFORM_ROLES.SUPER_ADMIN) {
+  if (!user || !workspaceAccess) {
+    throw Boom.forbidden(MESSAGE.error.auth.forbidden);
+  }
+
+  if (user.platformRole === PLATFORM_ROLES.SUPER_ADMIN) {
     return next();
   }
 
   const action = METHOD_TO_ACTION[req.method];
 
   if (!action) {
-    throw Boom.unauthorized(message.error.auth.unauthorized);
+    throw Boom.forbidden(MESSAGE.error.auth.forbidden);
   }
 
-  const requiredPermission = `${resource.toLowerCase()}:${action}`;
+  const permissions = PERMISSIONS[workspaceAccess.role]?.[resource] || [];
 
-  if (permissions.includes(requiredPermission)) {
+  if (permissions.includes(action)) {
     return next();
   }
 
-  throw Boom.forbidden(message.error.auth.forbidden);
+  throw Boom.forbidden(MESSAGE.error.auth.forbidden);
 };
 
 module.exports = checkPermissions;

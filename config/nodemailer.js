@@ -8,10 +8,15 @@ const transporter = (smtp) => {
     host: smtp.host,
     port: smtp.port,
     secure: smtp.port === 465, // true for 465, false for other ports
-    auth: {
-      user: smtp.user,
-      pass: smtp.pass,
-    },
+    auth: smtp.user
+      ? {
+          user: smtp.user,
+          pass: smtp.pass,
+        }
+      : undefined,
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
     ...(env.NODE_ENV === "development" && {
       tls: {
         rejectUnauthorized: false,

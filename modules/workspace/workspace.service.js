@@ -66,10 +66,6 @@ exports.updateWorkspace = async (payload) => {
     updatePayload.description = validatedPayload.description;
   }
 
-  if (validatedPayload.color && validatedPayload.color !== existingWorkspace?.color) {
-    updatePayload.color = validatedPayload.color;
-  }
-
   if (validatedPayload.status && validatedPayload.status !== existingWorkspace?.status) {
     updatePayload.status = validatedPayload.status;
   }

@@ -38,3 +38,11 @@ exports.formatCSVLog = () => {
     }),
   );
 };
+
+exports.formatPermissions = (permissions) => {
+  if (Array.isArray(permissions)) {
+    return permissions;
+  }
+
+  return Object.entries(permissions).flatMap(([resource, actions]) => (Array.isArray(actions) ? actions.map((action) => `${resource}:${action}`) : formatPermissions(actions)));
+};

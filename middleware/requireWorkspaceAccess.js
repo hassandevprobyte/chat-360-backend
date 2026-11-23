@@ -1,35 +1,44 @@
 const Boom = require("@hapi/boom");
-const asyncHandler = require("express-async-handler");
-
-// Validations
-const userValidation = require("../modules/user/user.validation");
-const workspaceValidation = require("../modules/workspace/workspace.validation");
 
 // Constants
-const { MESSAGE: message, ROLES, STATUSES } = require("../common/constants");
+const { MESSAGE: message, PLATFORM_ROLES, WORKSPACE_ROLES, PERMISSIONS } = require("../common/constants");
 
-const requireWorkspaceAccess = asyncHandler(async (req, res, next) => {
-  const workspace = await workspaceValidation.throwErrorIfWorkspaceSlugDoesNotExist(req.params.slug);
+const requireWorkspaceAccess = (req, res, next) => {
+  const { user, workspace } = req.context;
 
-  if (workspace.status !== STATUSES.WORKSPACE.ACTIVE) {
-    throw Boom.forbidden(`This workspace is ${workspace.status}`);
+  if (!user || !workspace) {
+    throw Boom.badRequest(message.error.auth.forbidden);
   }
 
-  const user = await userValidation.throwErrorIfUserDoesNotExist(req.context?.user?._id);
+  if (user.platformRole === PLATFORM_ROLES.SUPER_ADMIN) {
+    req.context.workspaceAccess = {
+      role: PLATFORM_ROLES.SUPER_ADMIN,
+      permissions: PERMISSIONS.SUPER_ADMIN,
+    };
 
-  const isOwner = workspace.user._id.equals(user._id);
-  const isMember = workspace.members.some((member) => member.user._id.equals(user._id));
-  const isSuperAdmin = user.platformRole === ROLES.PLATFORM_ROLES.SUPER_ADMIN;
-
-  if (!isSuperAdmin && !isOwner && !isMember) {
-    throw Boom.forbidden(message.error.auth.forbidden);
+    return next();
   }
 
-  req.context.workspace = workspace;
-  req.context.workspaceId = String(workspace._id);
-  req.context.permissions = user.permissions;
+  if (String(workspace?.user?._id) === String(user?._id)) {
+    req.context.workspaceAccess = {
+      role: WORKSPACE_ROLES.OWNER,
+      permissions: PERMISSIONS.OWNER,
+    };
 
-  return next();
-});
+    return next();
+  }
+
+  const isAgent = workspace?.agents.find((agent) => String(agent?.user?._id) === String(user?._id));
+  if (isAgent) {
+    req.context.workspaceAccess = {
+      role: WORKSPACE_ROLES.AGENT,
+      permissions: PERMISSIONS.AGENT,
+    };
+
+    return next();
+  }
+
+  throw Boom.forbidden(message.error.auth.forbidden);
+};
 
 module.exports = requireWorkspaceAccess;

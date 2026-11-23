@@ -14,7 +14,10 @@ const envSchema = Joi.object({
   REDIS_PREFIX: Joi.string().required(),
 
   JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+  JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
   JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
+  JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().required(),
+
   ENCRYPTION_KEY: Joi.string().required(),
 
   OTP_SECRET: Joi.string().required(),
@@ -66,7 +69,9 @@ const env = {
   },
   JWT: {
     ACCESS_TOKEN_SECRET: envVars.JWT_ACCESS_TOKEN_SECRET,
+    ACCESS_TOKEN_EXPIRES_IN: envVars.JWT_ACCESS_TOKEN_EXPIRES_IN,
     REFRESH_TOKEN_SECRET: envVars.JWT_REFRESH_TOKEN_SECRET,
+    REFRESH_TOKEN_EXPIRES_IN: envVars.JWT_REFRESH_TOKEN_EXPIRES_IN,
   },
   ENCRYPTION_KEY: envVars.ENCRYPTION_KEY,
   OTP: {

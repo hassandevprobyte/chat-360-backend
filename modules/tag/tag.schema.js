@@ -10,7 +10,7 @@ exports.baseSchema = Joi.object({
   title: Joi.string().trim().lowercase().min(2).max(40),
   titleKey: Joi.string().trim().lowercase().min(2).max(40),
   color: Joi.string().valid(...Object.values(COLORS)),
-  description: Joi.string().trim().lowercase().min(0).max(500).allowed(""),
+  description: Joi.string().trim().lowercase().min(0).max(500),
   isActive: Joi.boolean(),
   createdBy: Joi.objectId(),
   metadata: Joi.object().unknown(true),

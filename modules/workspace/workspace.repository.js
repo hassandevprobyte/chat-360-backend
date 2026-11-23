@@ -1,6 +1,6 @@
 const Workspace = require("./workspace.model");
 
-const POPULATION_PIPELINE = [{ path: "user" }, { path: "members.user" }];
+const POPULATION_PIPELINE = [{ path: "user" }, { path: "agents.user" }];
 
 exports.getAllWorkspaces = async (filters) => {
   return Workspace.find(filters).sort({ createdAt: -1 }).populate(POPULATION_PIPELINE).lean();

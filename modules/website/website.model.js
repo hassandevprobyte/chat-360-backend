@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Constants
-const { MODELS, WEBSITE_STATUS, VERIFICATION_STATUS, VERIFICATION_METHODS } = require("../../common/constants");
+const { MODELS, STATUSES, VERIFICATION_METHODS } = require("../../common/constants");
 
 const websiteSettingsSchema = {
   _id: false,
@@ -42,13 +42,13 @@ const schema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: Object.values(WEBSITE_STATUS),
-      default: WEBSITE_STATUS.ACTIVE,
+      enum: Object.values(STATUSES.WEBSITE),
+      default: STATUSES.WEBSITE.ACTIVE,
     },
     verificationStatus: {
       type: String,
-      enum: Object.values(VERIFICATION_STATUS),
-      default: VERIFICATION_STATUS.UNVERIFIED,
+      enum: Object.values(STATUSES.VERIFICATION),
+      default: STATUSES.VERIFICATION.UNVERIFIED,
     },
     verificationToken: {
       type: String,

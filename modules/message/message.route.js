@@ -5,8 +5,10 @@ const router = express.Router();
 const messageController = require("./message.controller");
 
 // Middlewares
+const uploadMiddleware = require("../../middleware/uploadMiddleware");
+
 const upload = uploadMiddleware({
-  destination: "public/uploads/insurance",
+  destination: "public/uploads/message",
   uploadType: "fields",
   field: [{ name: "attachments", maxCount: 10 }],
 });

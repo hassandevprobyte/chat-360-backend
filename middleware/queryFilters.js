@@ -19,16 +19,13 @@ const queryFilters =
       {
         ...queryScope,
         ...(req.query.query || {}),
-        ...(req.context?.workspaceId && {
-          workspace: req.context?.workspaceId,
-        }),
       },
       ["$or", ...extraFields],
       ["$or", "resource", "field"],
     );
 
-    if (req.context?.workspaceId) {
-      filters.workspace = req.context.workspaceId;
+    if (req?.context?.workspace) {
+      filters.workspace = String(req?.context?.workspace?._id);
     }
 
     const andConditions = [];

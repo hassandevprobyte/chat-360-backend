@@ -5,12 +5,16 @@ const asyncHandler = require("express-async-handler");
 const userValidation = require("../modules/user/user.validation");
 
 // Constants
-const { MESSAGE: message, ROLES } = require("../common/constants");
+const { MESSAGE: message, PLATFORM_ROLES } = require("../common/constants");
 
 const requireSuperAdminAccess = asyncHandler(async (req, res, next) => {
+  if (!req.context?.user?._id) {
+    throw Boom.forbidden(message.error.auth.forbidden);
+  }
+
   const user = await userValidation.throwErrorIfUserDoesNotExist(req.context?.user?._id);
 
-  if (user.platformRole !== ROLES.PLATFORM_ROLES.SUPER_ADMIN) {
+  if (user.platformRole !== PLATFORM_ROLES.SUPER_ADMIN) {
     throw Boom.unauthorized(message.error.auth.unauthorized);
   }
 

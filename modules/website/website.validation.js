@@ -6,8 +6,8 @@ const websiteRepository = require("./website.repository");
 // Constants
 const { MESSAGE: message } = require("../../common/constants");
 
-exports.throwErrorIfWebsiteDoesNotExist = async (websiteId) => {
-  const website = await websiteRepository.getWebsiteById(websiteId);
+exports.throwErrorIfWebsiteDoesNotExist = async (workspaceId, websiteId) => {
+  const website = await websiteRepository.getWebsiteById(workspaceId, websiteId);
 
   if (!website) {
     throw Boom.notFound(message.error.website.notFound);
@@ -16,10 +16,10 @@ exports.throwErrorIfWebsiteDoesNotExist = async (websiteId) => {
   return website;
 };
 
-exports.throwErrorIfWebsiteDomainExistsInWorkspace = async (domain, workspaceId) => {
-  const website = await websiteRepository.getWebsiteByDomainAndWorkspaceId(domain, workspaceId);
+exports.throwErrorIfWebsiteDomainExists = async (workspaceId, domain) => {
+  const website = await websiteRepository.getWebsiteByDomain(workspaceId, domain);
 
   if (website) {
-    throw Boom.notFound(message.error.website.alreadyExists);
+    throw Boom.notFound(message.error.website.domainExists);
   }
 };

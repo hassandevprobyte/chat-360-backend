@@ -1,7 +1,7 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { CURRENCY, DEPRECIATION, LOCALES, STATUSES, TIMEZONE } = require("../../common/constants");
+const { COLORS, CURRENCY, LOCALES, STATUSES, TIMEZONE } = require("../../common/constants");
 
 // Environment Variables
 const { env } = require("../../config");
@@ -14,12 +14,11 @@ exports.baseSchema = Joi.object({
   user: Joi.objectId(),
   title: Joi.string().trim().lowercase(),
   description: Joi.string().trim().lowercase(),
-  color: Joi.string().trim(),
   status: Joi.string()
     .trim()
     .valid(...Object.values(STATUSES.WORKSPACE))
     .default(STATUSES.WORKSPACE.ACTIVE),
-  members: Joi.array()
+  agents: Joi.array()
     .items(
       Joi.object({
         user: Joi.objectId(),
@@ -28,6 +27,9 @@ exports.baseSchema = Joi.object({
     )
     .unique("user"),
   settings: Joi.object({
+    color: Joi.string()
+      .trim()
+      .valid(...Object.values(COLORS)),
     timezone: Joi.string().valid(...Object.values(TIMEZONE)),
     currency: Joi.string().valid(...Object.values(CURRENCY)),
     locale: Joi.string().valid(...Object.values(LOCALES)),
@@ -37,6 +39,7 @@ exports.baseSchema = Joi.object({
 exports.createWorkspace = exports.baseSchema
   .fork(["user"], (field) => field.required())
   .fork("title", (schema) => schema.default("untitled"))
+  .fork("settings.color", (schema) => schema.default(COLORS.GRAY))
   .fork("settings.timezone", (schema) => schema.default(TIMEZONE.UTC))
   .fork("settings.currency", (schema) => schema.default(CURRENCY.USD))
   .fork("settings.locale", (schema) => schema.default(LOCALES.EN_US));

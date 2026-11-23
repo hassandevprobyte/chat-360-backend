@@ -1,7 +1,7 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { CONVERSATION_STATUS, CONVERSATION_PRIORITY } = require("../../common/constants");
+const { CONVERSATION_PRIORITY, STATUSES } = require("../../common/constants");
 
 exports.getConversationById = Joi.objectId().required();
 
@@ -12,7 +12,7 @@ exports.baseSchema = Joi.object({
   visitor: Joi.objectId(),
   assignedTo: Joi.objectId().allow(null),
   assignedAt: Joi.date().allow(null),
-  status: Joi.string().valid(...Object.values(CONVERSATION_STATUS)),
+  status: Joi.string().valid(...Object.values(STATUSES.CONVERSATION)),
   priority: Joi.string().valid(...Object.values(CONVERSATION_PRIORITY)),
   subject: Joi.string().max(160).allow(null),
   tags: Joi.array().items(Joi.objectId()),
@@ -40,7 +40,7 @@ exports.baseSchema = Joi.object({
 
 exports.createConversation = exports.baseSchema
   .fork(["workspace", "website", "widget", "visitor"], (schema) => schema.required())
-  .fork("status", (schema) => schema.default(CONVERSATION_STATUS.OPEN))
+  .fork("status", (schema) => schema.default(STATUSES.CONVERSATION.OPEN))
   .fork("priority", (schema) => schema.default(CONVERSATION_PRIORITY.NORMAL))
   .fork("tags", (schema) => schema.default([]))
   .fork("lastMessage", (schema) => schema.strip())

@@ -6,15 +6,10 @@ const userService = require("./user.service");
 // Utilities
 const transformQueryParams = require("../../common/utils/transformQueryToMongooseSyntax");
 
-// Scope
-const userScope = require("./user.scope");
-
 // @desc    Get all users
 // @route   GET /api/v1/users/all
 // @access  Private
 exports.getAllUsers = asyncHandler(async (req, res) => {
-  // const scopeQuery = userScope.scope(req.context?.user, req.query.query?.roles);
-
   const filters = transformQueryParams("User", { ...req.query.query });
 
   const data = await userService.getAllUsers(filters);
@@ -26,8 +21,6 @@ exports.getAllUsers = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/users
 // @access  Private
 exports.getUsersWithPagination = asyncHandler(async (req, res) => {
-  // const scopeQuery = userScope.scope(req.context?.user, req.query.query?.roles);
-
   const payload = {
     filters: transformQueryParams("User", { ...req.query.query }),
     page: req.pagination.page,
@@ -44,8 +37,6 @@ exports.getUsersWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/users/:id
 // @access  Private
 exports.getUserById = asyncHandler(async (req, res) => {
-  // await userScope.authorizeByScope(req.context?.user, req.params.id);
-
   const data = await userService.getUserById(req.params.id);
 
   res.status(200).json(data);
@@ -75,8 +66,6 @@ exports.createUser = asyncHandler(async (req, res) => {
 // @route   PATCH /api/v1/users/:id
 // @access  Private
 exports.updateUser = asyncHandler(async (req, res) => {
-  // await userScope.authorizeByScope(req.context?.user, req.params.id);
-
   const payload = {
     id: req.params.id,
     name: req.body.name,
@@ -98,8 +87,6 @@ exports.updateUser = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/users/:id
 // @access  Private
 exports.deleteUser = asyncHandler(async (req, res) => {
-  // await userScope.authorizeByScope(req.context?.user, req.params.id);
-
   const data = await userService.deleteUser(req.params.id);
 
   res.status(200).json(data);

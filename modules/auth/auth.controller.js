@@ -98,6 +98,7 @@ exports.login = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/auth/refresh
 // @access  Public
 exports.refresh = asyncHandler(async (req, res) => {
+  console.log("Refresh token => ", req.cookies);
   const { accessToken } = await authService.refresh(req.cookies?.refreshToken);
 
   res.cookie("accessToken", accessToken, {
@@ -141,6 +142,7 @@ exports.logout = asyncHandler(async (req, res) => {
 // @access  Private
 exports.changePassword = asyncHandler(async (req, res) => {
   const payload = { id: req.context?.user?._id, oldPassword: req.body.oldPassword, newPassword: req.body.newPassword };
+
   const user = await authService.changePassword(payload);
 
   res.status(200).json(user);

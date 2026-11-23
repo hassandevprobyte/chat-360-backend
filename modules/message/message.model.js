@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Constants
-const { SENDER_TYPES, MESSAGE_TYPES, MODELS } = require("../../common/constants");
+const { MODELS, TYPES } = require("../../common/constants");
 
 const schema = new mongoose.Schema(
   {
@@ -17,7 +17,7 @@ const schema = new mongoose.Schema(
     },
     senderType: {
       type: String,
-      enum: Object.values(SENDER_TYPES),
+      enum: Object.values(TYPES.SENDER),
       required: [true, "sender type is required"],
     },
     sender: {
@@ -32,8 +32,8 @@ const schema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: Object.values(MESSAGE_TYPES),
-      default: MESSAGE_TYPES.TEXT,
+      enum: Object.values(TYPES.MESSAGE),
+      default: TYPES.MESSAGE.TEXT,
     },
     content: {
       type: String,

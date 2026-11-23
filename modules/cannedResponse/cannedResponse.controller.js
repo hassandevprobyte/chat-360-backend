@@ -7,7 +7,12 @@ const cannedResponseService = require("./cannedResponse.service");
 // @route   GET /api/v1/workspaces/:slug/cannedResponses
 // @access  Private
 exports.getAllCannedResponses = asyncHandler(async (req, res) => {
-  const data = await cannedResponseService.getAllCannedResponses(req.filters);
+  const filters = {
+    ...req.filters,
+    workspace: req.context?.workspace?._id,
+  };
+
+  const data = await cannedResponseService.getAllCannedResponses(filters);
 
   res.status(200).json(data);
 });
@@ -17,7 +22,7 @@ exports.getAllCannedResponses = asyncHandler(async (req, res) => {
 // @access  Private
 exports.getCannedResponsesWithPagination = asyncHandler(async (req, res) => {
   const payload = {
-    filters: req.filters,
+    filters: { ...req.filters, workspace: req.context?.workspace?._id },
     page: req.pagination.page,
     pageSize: req.pagination.pageSize,
     sort: req.pagination.sort,
@@ -32,7 +37,12 @@ exports.getCannedResponsesWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/workspaces/:slug/cannedResponses/:cannedResponseId
 // @access  Private
 exports.getCannedResponseById = asyncHandler(async (req, res) => {
-  const data = await cannedResponseService.getCannedResponseById(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await cannedResponseService.getCannedResponseById(payload);
 
   res.status(200).json(data);
 });
@@ -42,7 +52,7 @@ exports.getCannedResponseById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createCannedResponse = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.body.workspace,
+    workspace: req.context?.workspace?._id,
     user: req.context?.user?._id,
     shortcut: req.body.shortcut,
     content: req.body.content,
@@ -61,9 +71,9 @@ exports.createCannedResponse = asyncHandler(async (req, res) => {
 // @access  Private
 exports.updateCannedResponse = asyncHandler(async (req, res) => {
   const payload = {
-    id: req.params.id,
-    workspace: req.body.workspace,
+    workspace: req.context?.workspace?._id,
     user: req.context?.user?._id,
+    id: req.params.id,
     shortcut: req.body.shortcut,
     content: req.body.content,
     isActive: req.body.isActive,
@@ -71,7 +81,7 @@ exports.updateCannedResponse = asyncHandler(async (req, res) => {
     lastUsedAt: req.body.lastUsedAt,
   };
 
-  const data = await cannedResponseService.updateCannedResponse(payload, req.params.cannedResponseId);
+  const data = await cannedResponseService.updateCannedResponse(payload);
 
   res.status(200).json(data);
 });
@@ -80,7 +90,12 @@ exports.updateCannedResponse = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/workspaces/:slug/cannedResponses/:cannedResponseId
 // @access  Private
 exports.deleteCannedResponse = asyncHandler(async (req, res) => {
-  const data = await cannedResponseService.deleteCannedResponse(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await cannedResponseService.deleteCannedResponse(payload);
 
   res.status(200).json(data);
 });

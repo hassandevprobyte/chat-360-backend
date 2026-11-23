@@ -7,19 +7,14 @@ exports.verifySMTP = async (smtp) => {
   try {
     await transporter(smtp).verify();
   } catch (error) {
-    switch (error.code) {
-      case "EAUTH":
-        throw Boom.badRequest("Invalid email credentials");
+    const errors = {
+      EAUTH: "Invalid email credentials",
+      ESOCKET: "Failed to connect to email server",
+      ETIMEDOUT: "Connection timeout",
+      ECONNECTION: "Failed to connect to email server",
+    };
 
-      case "ESOCKET":
-        throw Boom.badRequest("Failed to connect to email server");
-
-      case "ETIMEDOUT":
-        throw Boom.badRequest("Connection timeout");
-
-      default:
-        throw Boom.badRequest("Failed to connect to email server");
-    }
+    throw Boom.badRequest(errors[error.code] || "Failed to verify email configuration");
   }
 };
 

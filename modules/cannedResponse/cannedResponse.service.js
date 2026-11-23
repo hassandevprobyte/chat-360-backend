@@ -31,10 +31,10 @@ exports.getCannedResponsesWithPagination = async (payload) => {
   return { data: cannedResponses, meta };
 };
 
-exports.getCannedResponseById = async (cannedResponseId) => {
-  joi.validate(cannedResponseId, joiSchema.getCannedaResponseById);
+exports.getCannedResponseById = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getCannedaResponseById);
 
-  return cannedResponseValidation.throwErrorIfCannedResponseDoesNotExist(cannedResponseId);
+  return cannedResponseValidation.throwErrorIfCannedResponseDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 };
 
 exports.createCannedResponse = async (payload) => {
@@ -43,8 +43,8 @@ exports.createCannedResponse = async (payload) => {
   await Promise.all([
     userValidation.throwErrorIfUserDoesNotExist(validatedPayload.user),
     workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(validatedPayload.shortcut, validatedPayload.workspace, validatedPayload.user),
-    cannedResponseValidation.throwErrorIfMaximumCannedResponsesPerUserReached(validatedPayload.workspace, validatedPayload.user),
+    cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(validatedPayload.workspace, validatedPayload.shortcut, validatedPayload.user),
+    cannedResponseValidation.throwErrorIfMaximumNumberOfCannedResponsesReached(validatedPayload.workspace, validatedPayload.user),
   ]);
 
   return cannedResponseRepository.createCannedResponse(validatedPayload);
@@ -53,45 +53,46 @@ exports.createCannedResponse = async (payload) => {
 exports.updateCannedResponse = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateCannedResponse);
 
-  const existingcannedResponse = await cannedResponseValidation.throwErrorIfCannedResponseDoesNotExist(validatedPayload.id);
+  const existingCannedResponse = await cannedResponseValidation.throwErrorIfCannedResponseDoesNotExistInContext(
+    validatedPayload.workspace,
+    validatedPayload.user,
+    validatedPayload.id,
+  );
   const updatePayload = {};
 
-  if (validatedPayload.shortcut && validatedPayload.shortcut !== existingcannedResponse?.shortcut) {
-    await cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(
-      validatedPayload.shortcut,
-      String(existingcannedResponse?.workspace?._id),
-      String(existingcannedResponse?.user?._id),
-    );
+  if (validatedPayload.shortcut && validatedPayload.shortcut !== existingCannedResponse?.shortcut) {
+    await cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(validatedPayload.workspace, validatedPayload.user, validatedPayload.shortcut);
+
     updatePayload.shortcut = validatedPayload.shortcut;
   }
 
-  if (validatedPayload.content && validatedPayload.content !== existingcannedResponse?.content) {
+  if (validatedPayload.content && validatedPayload.content !== existingCannedResponse?.content) {
     updatePayload.content = validatedPayload.content;
   }
 
-  if (validatedPayload.isActive !== undefined && validatedPayload.isActive !== existingcannedResponse?.isActive) {
+  if (validatedPayload.isActive !== undefined && validatedPayload.isActive !== existingCannedResponse?.isActive) {
     updatePayload.isActive = validatedPayload.isActive;
   }
 
-  if (validatedPayload.usageCount && validatedPayload.usageCount !== existingcannedResponse?.usageCount) {
+  if (validatedPayload.usageCount && validatedPayload.usageCount !== existingCannedResponse?.usageCount) {
     updatePayload.usageCount = validatedPayload.usageCount;
   }
 
-  if (validatedPayload.lastUsedAt && validatedPayload.lastUsedAt !== existingcannedResponse?.lastUsedAt) {
+  if (validatedPayload.lastUsedAt && validatedPayload.lastUsedAt !== existingCannedResponse?.lastUsedAt) {
     updatePayload.lastUsedAt = validatedPayload.lastUsedAt;
   }
 
-  if (!Object.keys(updatePayload).length) return existingcannedResponse;
+  if (!Object.keys(updatePayload).length) return existingCannedResponse;
 
   return cannedResponseRepository.updateCannedResponseById(validatedPayload.id, updatePayload);
 };
 
-exports.deleteCannedResponse = async (cannedResponseId) => {
-  joi.validate(cannedResponseId, joiSchema.getCannedaResponseById);
+exports.deleteCannedResponse = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getCannedaResponseById);
 
-  await cannedResponseValidation.throwErrorIfCannedResponseDoesNotExist(cannedResponseId);
+  await cannedResponseValidation.throwErrorIfCannedResponseDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 
-  await cannedResponseRepository.deleteCannedResponseById(cannedResponseId);
+  await cannedResponseRepository.deleteCannedResponseById(validatedPayload.id);
 
-  return { deletedId: cannedResponseId };
+  return { deletedId: validatedPayload.id };
 };

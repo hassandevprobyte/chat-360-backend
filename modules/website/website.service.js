@@ -7,7 +7,6 @@ const websiteRepository = require("./website.repository");
 const joi = require("../../config/joi");
 const joiSchema = require("./website.schema");
 const websiteValidation = require("./website.validation");
-const workspaceValidation = require("../workspace/workspace.validation");
 
 exports.getAllWebsites = async (filters) => {
   return websiteRepository.getAllWebsites(filters);
@@ -24,19 +23,17 @@ exports.getWebsitesWithPagination = async (payload) => {
   return { data: websites, meta };
 };
 
-exports.getWebsiteById = async (websiteId) => {
-  joi.validate(websiteId, joiSchema.getWebsiteById);
+exports.getWebsiteById = async (payload) => {
+  console.log(payload);
+  const validatedPayload = joi.validate(payload, joiSchema.getWebsiteById);
 
-  return websiteValidation.throwErrorIfWebsiteDoesNotExist(websiteId);
+  return websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 };
 
 exports.createWebsite = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.createWebsite);
 
-  await Promise.all([
-    workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    websiteValidation.throwErrorIfWebsiteDomainExistsInWorkspace(validatedPayload.domain, validatedPayload.workspace),
-  ]);
+  await websiteValidation.throwErrorIfWebsiteDomainExists(validatedPayload.workspace, validatedPayload.domain);
 
   return websiteRepository.createWebsite(validatedPayload);
 };
@@ -44,7 +41,7 @@ exports.createWebsite = async (payload) => {
 exports.updateWebsite = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateWebsite);
 
-  const existingWebsite = await websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.id);
+  const existingWebsite = await websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.id);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existingWebsite?.title) {
@@ -100,12 +97,12 @@ exports.updateWebsite = async (payload) => {
   return websiteRepository.updateWebsiteById(validatedPayload.id, updatePayload);
 };
 
-exports.deleteWebsite = async (websiteId) => {
-  joi.validate(websiteId, joiSchema.getWebsiteById);
+exports.deleteWebsite = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getWebsiteById);
 
-  await websiteValidation.throwErrorIfWebsiteDoesNotExist(websiteId);
+  await websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 
-  await websiteRepository.deleteWebsiteById(websiteId);
+  await websiteRepository.deleteWebsiteById(validatedPayload.id);
 
-  return { deletedId: websiteId };
+  return { deletedId: validatedPayload.id };
 };

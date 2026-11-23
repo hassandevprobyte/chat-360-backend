@@ -18,25 +18,38 @@ exports.PLATFORM_ROLES = Object.freeze({ USER: "USER", SUPER_ADMIN: "SUPER_ADMIN
 
 exports.WORKSPACE_ROLES = Object.freeze({ OWNER: "OWNER", AGENT: "AGENT" });
 
-/**
- * Permissions exist as a light extensibility hook (WorkspaceMember.permissions).
- * v1 behaviour is driven by role; a member may be granted extra permissions, and
- * OWNER implicitly holds all of them.
- */
 exports.PERMISSIONS = Object.freeze({
-  WORKSPACE_MANAGE: "workspace:manage",
-  MEMBER_MANAGE: "member:manage",
-  WEBSITE_MANAGE: "website:manage",
-  WIDGET_MANAGE: "widget:manage",
-  TAG_MANAGE: "tag:manage",
-  AUDIT_LOG_VIEW: "auditLog:view",
-  CONVERSATION_VIEW: "conversation:view",
-  CONVERSATION_CLAIM: "conversation:claim",
-  CONVERSATION_REPLY: "conversation:reply",
-  CONVERSATION_CLOSE: "conversation:close",
-  CONVERSATION_TAG: "conversation:tag",
-  CONVERSATION_ASSIGN_OTHERS: "conversation:assign_others",
-  SHORTCUT_MANAGE_OWN: "shortcut:manage_own",
+  SUPER_ADMIN: ["*"],
+  OWNER: {
+    [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.AUDIT_LOG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CANNED_RESPONSE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CONVERSATION]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.MESSAGE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.PICKLIST]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.ROLE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.TAG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.USER]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.VISITOR]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WEBSITE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+  },
+  AGENT: {
+    [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.AUDIT_LOG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CANNED_RESPONSE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CONVERSATION]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.MESSAGE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.PICKLIST]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.ROLE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.TAG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.USER]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.VISITOR]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WEBSITE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+  },
 });
 
 exports.COLORS = Object.freeze({
@@ -55,69 +68,17 @@ exports.COLORS = Object.freeze({
   ORANGE: "orange",
 });
 
-exports.AGENT_DEFAULT_PERMISSIONS = Object.freeze([
-  exports.PERMISSIONS.CONVERSATION_VIEW,
-  exports.PERMISSIONS.CONVERSATION_CLAIM,
-  exports.PERMISSIONS.CONVERSATION_REPLY,
-  exports.PERMISSIONS.CONVERSATION_CLOSE,
-  exports.PERMISSIONS.CONVERSATION_TAG,
-  exports.PERMISSIONS.SHORTCUT_MANAGE_OWN,
-]);
-
-exports.CONVERSATION_STATUS = Object.freeze({ OPEN: "OPEN", PENDING: "PENDING", CLOSED: "CLOSED" });
-
 exports.CONVERSATION_PRIORITY = Object.freeze({
-  LOW: "LOW",
-  NORMAL: "NORMAL",
-  HIGH: "HIGH",
-  URGENT: "URGENT",
+  LOW: "low",
+  NORMAL: "normal",
+  HIGH: "high",
+  URGENT: "urgent",
 });
 
-exports.SENDER_TYPES = Object.freeze({ VISITOR: "VISITOR", USER: "USER", SYSTEM: "SYSTEM" });
-
-exports.MESSAGE_TYPES = Object.freeze({
-  TEXT: "TEXT",
-  IMAGE: "IMAGE",
-  FILE: "FILE",
-  SYSTEM: "SYSTEM",
-  INTERNAL_NOTE: "INTERNAL_NOTE",
-});
-
-/** Message types a visitor is ever allowed to see. INTERNAL_NOTE is deliberately absent. */
-exports.VISITOR_VISIBLE_MESSAGE_TYPES = Object.freeze([exports.MESSAGE_TYPES.TEXT, exports.MESSAGE_TYPES.IMAGE, exports.MESSAGE_TYPES.FILE, exports.MESSAGE_TYPES.SYSTEM]);
-
-exports.NOTIFICATION_TYPES = Object.freeze({
-  NEW_CONVERSATION: "NEW_CONVERSATION",
-  NEW_MESSAGE: "NEW_MESSAGE",
-  CONVERSATION_ASSIGNED: "CONVERSATION_ASSIGNED",
-  MENTION: "MENTION",
-  WORKSPACE_INVITATION: "WORKSPACE_INVITATION",
-  AGENT_INVITATION: "AGENT_INVITATION",
-});
-
-exports.PRESENCE_STATUS = Object.freeze({ ONLINE: "ONLINE", AWAY: "AWAY", OFFLINE: "OFFLINE" });
-
-exports.WEBSITE_STATUS = Object.freeze({ ACTIVE: "ACTIVE", INACTIVE: "INACTIVE", PENDING: "PENDING" });
-
-exports.VERIFICATION_STATUS = Object.freeze({
-  UNVERIFIED: "UNVERIFIED",
-  PENDING: "PENDING",
-  VERIFIED: "VERIFIED",
-  FAILED: "FAILED",
-});
-
-/** Ways a workspace can prove ownership of a website's domain. */
 exports.VERIFICATION_METHODS = Object.freeze({
   DNS_TXT: "DNS_TXT",
   META_TAG: "META_TAG",
   FILE_UPLOAD: "FILE_UPLOAD",
-});
-
-exports.INVITATION_STATUS = Object.freeze({
-  PENDING: "PENDING",
-  ACCEPTED: "ACCEPTED",
-  REVOKED: "REVOKED",
-  EXPIRED: "EXPIRED",
 });
 
 exports.WIDGET_POSITIONS = Object.freeze({ BOTTOM_RIGHT: "BOTTOM_RIGHT", BOTTOM_LEFT: "BOTTOM_LEFT" });
@@ -169,50 +130,6 @@ exports.AUDIT_ACTIONS = Object.freeze({
   SETTINGS_UPDATED: "settings.updated",
   SUPER_ADMIN_INSPECTED_CONVERSATION: "super_admin.conversation_inspected",
   SUPER_ADMIN_VIEWED_WORKSPACE: "super_admin.workspace_viewed",
-});
-
-exports.ERROR_CODES = Object.freeze({
-  BAD_REQUEST: "BAD_REQUEST",
-  VALIDATION_ERROR: "VALIDATION_ERROR",
-  UNAUTHORIZED: "UNAUTHORIZED",
-  INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
-  TOKEN_EXPIRED: "TOKEN_EXPIRED",
-  TOKEN_INVALID: "TOKEN_INVALID",
-  FORBIDDEN: "FORBIDDEN",
-  NOT_WORKSPACE_MEMBER: "NOT_WORKSPACE_MEMBER",
-  INSUFFICIENT_ROLE: "INSUFFICIENT_ROLE",
-  INSUFFICIENT_PERMISSION: "INSUFFICIENT_PERMISSION",
-  RESOURCE_NOT_FOUND: "RESOURCE_NOT_FOUND",
-  CONFLICT: "CONFLICT",
-  ALREADY_EXISTS: "ALREADY_EXISTS",
-  ALREADY_ASSIGNED: "ALREADY_ASSIGNED",
-  WORKSPACE_SUSPENDED: "WORKSPACE_SUSPENDED",
-  ACCOUNT_INACTIVE: "ACCOUNT_INACTIVE",
-  EMAIL_NOT_VERIFIED: "EMAIL_NOT_VERIFIED",
-  RATE_LIMITED: "RATE_LIMITED",
-  PAYLOAD_TOO_LARGE: "PAYLOAD_TOO_LARGE",
-  UNSUPPORTED_MEDIA_TYPE: "UNSUPPORTED_MEDIA_TYPE",
-  ORIGIN_NOT_ALLOWED: "ORIGIN_NOT_ALLOWED",
-  VERIFICATION_FAILED: "VERIFICATION_FAILED",
-  INTERNAL_ERROR: "INTERNAL_ERROR",
-});
-
-exports.ALLOWED_ATTACHMENT_MIME_TYPES = Object.freeze({
-  "image/png": [".png"],
-  "image/jpeg": [".jpg", ".jpeg"],
-  "image/gif": [".gif"],
-  "image/webp": [".webp"],
-  "image/svg+xml": [".svg"],
-  "application/pdf": [".pdf"],
-  "text/plain": [".txt"],
-  "text/csv": [".csv"],
-  "application/zip": [".zip"],
-  "application/msword": [".doc"],
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
-  "application/vnd.ms-excel": [".xls"],
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
-  "application/vnd.ms-powerpoint": [".ppt"],
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
 });
 
 exports.CANNED_RESPONSE = Object.freeze({ MAX_PER_USER: 100, SHORTCUT_REGEX: /^\/[a-z0-9][a-z0-9._-]*$/i });
@@ -283,30 +200,15 @@ exports.MESSAGE = Object.freeze({
     },
     website: {
       notFound: "website not found",
-      alreadyExists: "website already exists",
+      domainExists: "website domain already exists",
     },
     workspace: {
       notFound: "Workspace not found",
       alreadyExists: "Workspace already exists",
       slugExists: "Workspace slug already exists",
+      currentStatus: (status) => `Workspace is ${status}`,
     },
   },
-});
-
-exports.COLORS = Object.freeze({
-  GRAY: "gray",
-  RED: "red",
-  PINK: "pink",
-  GRAPE: "grape",
-  VIOLET: "violet",
-  INDIGO: "indigo",
-  BLUE: "blue",
-  CYAN: "cyan",
-  TEAL: "teal",
-  GREEN: "green",
-  LIME: "lime",
-  YELLOW: "yellow",
-  ORANGE: "orange",
 });
 
 exports.CRUD = Object.freeze({
@@ -666,14 +568,6 @@ exports.DEFAULTS = Object.freeze({
   ],
 });
 
-exports.STATUSES = Object.freeze({
-  VEHICLE: { ASSIGNED: "assigned", IN_MAINTENANCE: "in_maintenance", IN_HOUSE: "in_house" },
-  INSURANCE: { ACTIVE: "active", EXPIRED: "expired", CANCELLED: "cancelled" },
-  MAINTENANCE: { INITIATED: "initiated", COMPLETED: "completed" },
-  WORKSPACE: { ACTIVE: "active", ARCHIVED: "archived", SUSPENDED: "suspended" },
-  USER: { ACTIVE: "active", BLOCKED: "blocked", SUSPENDED: "suspended" },
-});
-
 exports.TIMEZONE = Object.freeze({
   UTC: "UTC",
   ASIA_KARACHI: "Asia/Karachi",
@@ -731,6 +625,33 @@ exports.TIMEZONE = Object.freeze({
 
 exports.TYPES = Object.freeze({
   OTP: { EMAIL: "email", PHONE: "phone" },
+  SENDER: { VISITOR: "visitor", USER: "user", SYSTEM: "system" },
+  MESSAGE: { TEXT: "text", IMAGE: "image", FILE: "file", SYSTEM: "system", INTERNAL_NOTE: "internal_note" },
+  NOTIFICATION: {
+    NEW_CONVERSATION: "new_conversation",
+    NEW_MESSAGE: "new_message",
+    CONVERSATION_ASSIGNED: "conversation_assigned",
+    MENTION: "mention",
+    WORKSPACE_INVITATION: "workspace_invitation",
+    AGENT_INVITATION: "agent_invitation",
+  },
+  ALLOWED_ATTACHMENT_MIME: {
+    "image/png": [".png"],
+    "image/jpeg": [".jpg", ".jpeg"],
+    "image/gif": [".gif"],
+    "image/webp": [".webp"],
+    "image/svg+xml": [".svg"],
+    "application/pdf": [".pdf"],
+    "text/plain": [".txt"],
+    "text/csv": [".csv"],
+    "application/zip": [".zip"],
+    "application/msword": [".doc"],
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+    "application/vnd.ms-excel": [".xls"],
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+    "application/vnd.ms-powerpoint": [".ppt"],
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
+  },
 });
 
 exports.LOCALES = Object.freeze({
@@ -796,4 +717,15 @@ exports.SCOPE = Object.freeze({
   BRAND: "brand",
   COMPANY: "company",
   ALL: "all",
+});
+
+exports.STATUSES = Object.freeze({
+  VEHICLE: { ASSIGNED: "assigned", IN_MAINTENANCE: "in_maintenance", IN_HOUSE: "in_house" },
+  INSURANCE: { ACTIVE: "active", EXPIRED: "expired", CANCELLED: "cancelled" },
+  MAINTENANCE: { INITIATED: "initiated", COMPLETED: "completed" },
+  WORKSPACE: { ACTIVE: "active", ARCHIVED: "archived", SUSPENDED: "suspended" },
+  USER: { ACTIVE: "active", BLOCKED: "blocked", SUSPENDED: "suspended" },
+  CONVERSATION: { OPEN: "open", PENDING: "pending", CLOSED: "closed" },
+  WEBSITE: { ACTIVE: "active", INACTIVE: "inactive", PENDING: "pending" },
+  VERIFICATION: { UNVERIFIED: "unverified", PENDING: "pending", VERIFIED: "verified", FAILED: "failed" },
 });

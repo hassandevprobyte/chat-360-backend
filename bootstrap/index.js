@@ -2,6 +2,7 @@ const seed = require("./seed");
 
 // Configs
 const { connectDB } = require("../config/db");
+const redis = require("../config/redis");
 
 // Jobs
 const { createWorkers } = require("../jobs/workers");

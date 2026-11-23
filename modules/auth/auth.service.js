@@ -1,5 +1,4 @@
 const bcrypt = require("bcrypt");
-const Boom = require("@hapi/boom");
 const jwt = require("jsonwebtoken");
 
 // Services
@@ -20,61 +19,60 @@ const userValidation = require("../user/user.validation");
 const { env } = require("../../config");
 
 // Constants
-const { MESSAGE: message, PERMISSIONS, ROLES } = require("../../common/constants");
+const { MESSAGE: message, PERMISSIONS, PLATFORM_ROLES, WORKSPACE_ROLES } = require("../../common/constants");
 
 // Helpers
 const emailHelpers = require("../../common/helpers/emailHelpers");
-
-const getPermissions = (permissions) => Object.values(permissions).flatMap((value) => (typeof value === "object" ? getPermissions(value) : value));
+const formatters = require("../../common/formatters");
 
 exports.signup = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.signup);
 
   await userValidation.throwErrorIfUserEmailExists(validatedPayload.email);
 
-  validatedPayload.platformRole = ROLES.PLATFORM_ROLES.USER;
-  validatedPayload.workspaceRole = ROLES.WORKSPACE_ROLES.OWNER;
+  validatedPayload.platformRole = PLATFORM_ROLES.USER;
+  validatedPayload.workspaceRole = WORKSPACE_ROLES.OWNER;
 
-  validatedPayload.permissions = getPermissions(PERMISSIONS.WORKSPACE.OWNER);
+  validatedPayload.permissions = formatters.formatPermissions(PERMISSIONS.OWNER);
 
   const user = await userService.createUser(validatedPayload);
   await workspaceService.createWorkspace({ user: user._id });
 
-  const otp = await otpService.createOtp({ key: `${user._id}:otp` });
+  // const otp = await otpService.createOtp({ key: `${user._id}:otp` });
 
-  const smtp = {
-    host: env.SMTP.HOST,
-    port: env.SMTP.PORT,
-    user: env.SMTP.USER,
-    pass: env.SMTP.PASSWORD,
-  };
+  // const smtp = {
+  //   host: env.SMTP.HOST,
+  //   port: env.SMTP.PORT,
+  //   user: env.SMTP.USER,
+  //   pass: env.SMTP.PASSWORD,
+  // };
 
-  const emailMessage = {
-    to: user.email,
-    from: smtp.user,
-    subject: "Email Verification",
-    html: `<p>Dear ${user.name},</p>
-           <p>Thank you for signing up. Please use the following OTP to verify your email address:</p>
-           <h2>${otp}</h2>
-           <p>Best regards,<br>Fleet 360 Team</p>`,
-    cc: [],
-    bcc: [],
-    priority: "high",
-    headers: {
-      Importance: "high",
-      Priority: "urgent",
-      "X-Priority": "1",
-      "X-MSMail-Priority": "High",
-    },
-    messageId: `<${Date.now()}-${user._id}-@${smtp.host}>`,
-    date: new Date(),
-  };
+  // const emailMessage = {
+  //   to: user.email,
+  //   from: smtp.user,
+  //   subject: "Email Verification",
+  //   html: `<p>Dear ${user.name},</p>
+  //          <p>Thank you for signing up. Please use the following OTP to verify your email address:</p>
+  //          <h2>${otp}</h2>
+  //          <p>Best regards,<br>${env.APP_NAME} Team</p>`,
+  //   cc: [],
+  //   bcc: [],
+  //   priority: "high",
+  //   headers: {
+  //     Importance: "high",
+  //     Priority: "urgent",
+  //     "X-Priority": "1",
+  //     "X-MSMail-Priority": "High",
+  //   },
+  //   messageId: `<${Date.now()}-${user._id}-@${smtp.host}>`,
+  //   date: new Date(),
+  // };
 
-  await emailHelpers.sendMail(emailMessage, smtp);
+  // await emailHelpers.sendMail(emailMessage, smtp);
 
   // Tokens
-  const accessToken = `Bearer ${jwt.sign({ id: user._id }, env.JWT.ACCESS_TOKEN_SECRET, { expiresIn: "7d" })}`;
-  const refreshToken = `Bearer ${jwt.sign({ id: user._id }, env.JWT.REFRESH_TOKEN_SECRET, { expiresIn: "30d" })}`;
+  const accessToken = `Bearer ${jwt.sign({ id: user._id }, env.JWT.ACCESS_TOKEN_SECRET, { expiresIn: env.JWT.ACCESS_TOKEN_EXPIRES_IN })}`;
+  const refreshToken = `Bearer ${jwt.sign({ id: user._id }, env.JWT.REFRESH_TOKEN_SECRET, { expiresIn: env.JWT.REFRESH_TOKEN_EXPIRES_IN })}`;
 
   return { user, accessToken, refreshToken };
 };
@@ -97,7 +95,7 @@ exports.verifyEmail = async (payload) => {
 
   const response = user.toObject ? user.toObject() : { ...user };
 
-  if (response.platformRole !== ROLES.PLATFORM_ROLES.SUPER_ADMIN) {
+  if (response.platformRole !== PLATFORM_ROLES.SUPER_ADMIN) {
     const workspace = await authValidation.throwErrorIfUserWorkspaceDoesNotExist(response._id);
 
     response.slug = workspace.slug;
@@ -162,7 +160,7 @@ exports.login = async (payload) => {
   const { _id, ...userPayload } = user.toObject();
   userPayload.id = user._id;
 
-  if (user.platformRole !== ROLES.PLATFORM_ROLES.SUPER_ADMIN) {
+  if (user.platformRole !== PLATFORM_ROLES.SUPER_ADMIN) {
     const workspace = await authValidation.throwErrorIfUserWorkspaceDoesNotExist(user._id);
     userPayload.slug = workspace.slug;
   }
@@ -175,17 +173,15 @@ exports.login = async (payload) => {
 };
 
 exports.refresh = async (refreshToken) => {
-  if (!refreshToken) {
-    throw Boom.unauthorized(message.error.auth.unauthorized);
-  }
+  const token = authValidation.throwErrorIfRefreshTokenIsInvalid(refreshToken);
 
-  const decoded = jwt.verify(refreshToken, env.JWT.REFRESH_TOKEN_SECRET);
+  const decoded = jwt.verify(token, env.JWT.REFRESH_TOKEN_SECRET);
 
   const user = await userValidation.throwErrorIfUserDoesNotExist(decoded.id);
 
   authValidation.throwErrorIfUserIsInactive(user);
 
-  const accessToken = `Bearer ${jwt.sign({ id: user._id }, env.JWT.ACCESS_TOKEN_SECRET, { expiresIn: "7d" })}`;
+  const accessToken = `Bearer ${jwt.sign({ id: user._id }, env.JWT.ACCESS_TOKEN_SECRET, { expiresIn: env.JWT.ACCESS_TOKEN_EXPIRES_IN })}`;
 
   return { accessToken };
 };

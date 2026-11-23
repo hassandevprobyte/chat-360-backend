@@ -1,17 +1,20 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { WEBSITE_STATUS, VERIFICATION_STATUS, VERIFICATION_METHODS } = require("../../common/constants");
+const { STATUSES, VERIFICATION_METHODS } = require("../../common/constants");
 
-exports.getWebsiteById = Joi.objectId().required();
+exports.getWebsiteById = Joi.object({
+  workspace: Joi.objectId().required(),
+  id: Joi.objectId().required(),
+});
 
 exports.baseSchema = Joi.object({
   workspace: Joi.objectId(),
   title: Joi.string().trim().min(1).max(120),
   domain: Joi.string().trim().lowercase().max(253).required(),
   allowedDomains: Joi.array().items(Joi.string().trim().lowercase().max(253)),
-  status: Joi.string().valid(...Object.values(WEBSITE_STATUS)),
-  verificationStatus: Joi.string().valid(...Object.values(VERIFICATION_STATUS)),
+  status: Joi.string().valid(...Object.values(STATUSES.WEBSITE)),
+  verificationStatus: Joi.string().valid(...Object.values(STATUSES.VERIFICATION)),
   verificationToken: Joi.string().allow(null),
   verificationMethod: Joi.string()
     .valid(...Object.values(VERIFICATION_METHODS))

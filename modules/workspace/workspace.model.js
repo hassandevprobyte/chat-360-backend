@@ -18,6 +18,11 @@ const agentschema = {
 
 const settingSchema = {
   _id: false,
+  color: {
+    type: String,
+    enum: Object.values(COLORS),
+    default: COLORS.GRAY,
+  },
   timezone: {
     type: String,
     enum: Object.values(TIMEZONE),
@@ -57,11 +62,6 @@ const schema = new mongoose.Schema(
       type: String,
       trim: true,
       required: [true, "slug is required"],
-    },
-    color: {
-      type: String,
-      enum: Object.values(COLORS),
-      default: COLORS.GRAY,
     },
     status: {
       type: String,

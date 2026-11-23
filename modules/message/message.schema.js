@@ -1,17 +1,17 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { SENDER_TYPES, MESSAGE_TYPES } = require("../../common/constants");
+const { TYPES } = require("../../common/constants");
 
 exports.getMessageById = Joi.objectId().required();
 
 exports.baseSchema = Joi.object({
   workspace: Joi.objectId(),
   conversation: Joi.objectId(),
-  senderType: Joi.string().valid(...Object.values(SENDER_TYPES)),
+  senderType: Joi.string().valid(...Object.values(TYPES.SENDER)),
   sender: Joi.objectId().allow(null),
   visitor: Joi.objectId().allow(null),
-  type: Joi.string().valid(...Object.values(MESSAGE_TYPES)),
+  type: Joi.string().valid(...Object.values(TYPES.MESSAGE)),
   content: Joi.string().max(10000),
   attachments: Joi.array().items(Joi.objectId()),
   deliveredAt: Joi.date().allow(null),
@@ -23,7 +23,7 @@ exports.baseSchema = Joi.object({
 
 exports.createMessage = exports.baseSchema
   .fork(["workspace", "conversation", "senderType"], (schema) => schema.required())
-  .fork("type", (schema) => schema.default(MESSAGE_TYPES.TEXT))
+  .fork("type", (schema) => schema.default(TYPES.MESSAGE.TEXT))
   .fork("content", (schema) => schema.default(""))
   .fork("attachments", (schema) => schema.default([]))
   .fork("metadata", (schema) => schema.default({}));

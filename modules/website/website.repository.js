@@ -14,12 +14,12 @@ exports.getWebsitesCount = async (filters) => {
   return Website.countDocuments(filters);
 };
 
-exports.getWebsiteById = async (websiteId) => {
-  return Website.findById(websiteId).populate(POPULATION_PIPELINE).lean();
+exports.getWebsiteById = async (workspaceId, websiteId) => {
+  return Website.findOne({ _id: websiteId, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getWebsiteByDomainAndWorkspaceId = async (domain, workspaceId) => {
-  return Website.findOne({ domain, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
+exports.getWebsiteByDomain = async (workspaceId, domain) => {
+  return Website.findOne({ workspace: workspaceId, domain }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.createWebsite = async (payload) => {

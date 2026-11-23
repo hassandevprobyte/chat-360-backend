@@ -7,7 +7,9 @@ const websiteService = require("./website.service");
 // @route   GET /api/v1/websites/all
 // @access  Private
 exports.getAllWebsites = asyncHandler(async (req, res) => {
-  const data = await websiteService.getAllWebsites(req.filters);
+  const filters = { ...req.filters, workspace: req.context?.workspace?._id };
+
+  const data = await websiteService.getAllWebsites(filters);
 
   res.status(200).json(data);
 });
@@ -17,7 +19,7 @@ exports.getAllWebsites = asyncHandler(async (req, res) => {
 // @access  Private
 exports.getWebsitesWithPagination = asyncHandler(async (req, res) => {
   const payload = {
-    filters: req.filters,
+    filters: { ...req.filters, workspace: req.context?.workspace?._id },
     page: req.pagination.page,
     pageSize: req.pagination.pageSize,
     sort: req.pagination.sort,
@@ -32,7 +34,12 @@ exports.getWebsitesWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/websites/:id
 // @access  Private
 exports.getWebsiteById = asyncHandler(async (req, res) => {
-  const data = await websiteService.getWebsiteById(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await websiteService.getWebsiteById(payload);
 
   res.status(200).json(data);
 });
@@ -42,7 +49,7 @@ exports.getWebsiteById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createWebsite = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     title: req.body.title,
     domain: req.body.domain,
     allowedDomains: req.body.allowedDomains,
@@ -67,6 +74,7 @@ exports.createWebsite = asyncHandler(async (req, res) => {
 // @access  Private
 exports.updateWebsite = asyncHandler(async (req, res) => {
   const payload = {
+    workspace: req.context?.workspace?._id,
     id: req.params.id,
     title: req.body.title,
     domain: req.body.domain,
@@ -91,7 +99,12 @@ exports.updateWebsite = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/websites/:id
 // @access  Private
 exports.deleteWebsite = asyncHandler(async (req, res) => {
-  const data = await websiteService.deleteWebsite(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await websiteService.deleteWebsite(payload);
 
   res.status(200).json(data);
 });

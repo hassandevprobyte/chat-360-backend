@@ -49,3 +49,17 @@ exports.throwErrorIfUserWorkspaceDoesNotExist = async (userId) => {
 
   return workspace;
 };
+
+exports.throwErrorIfRefreshTokenIsInvalid = (refreshToken) => {
+  if (!refreshToken) {
+    throw Boom.badRequest(message.error.auth.forbidden);
+  }
+
+  const [scheme, token] = refreshToken.split(" ");
+
+  if (scheme !== "Bearer" || !token) {
+    throw Boom.unauthorized(`${message.error.auth.unauthorized}, invalid authorization header`);
+  }
+
+  return token;
+};

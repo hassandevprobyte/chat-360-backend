@@ -3,6 +3,9 @@ const cron = require("node-cron");
 const fs = require("fs");
 const path = require("path");
 
+// Environment Variables
+const env = require("../config/env");
+
 const deleteOlderFiles = (dir, dateTime, filesToKeep = 3) => {
   fs.readdir(dir, (error, files) => {
     if (error) {
@@ -39,7 +42,7 @@ const deleteOlderFiles = (dir, dateTime, filesToKeep = 3) => {
 
 const backupMongoDB = () => {
   cron.schedule("0 7 * * 0", (datetime) => {
-    const DB_NAME = "fleet360";
+    const DB_NAME = `${env.APP_NAME}`;
     const BACKUP_DIR = path.join(__dirname, "../backup");
 
     if (!fs.existsSync(BACKUP_DIR)) {

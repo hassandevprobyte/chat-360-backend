@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const userValidation = require("../modules/user/user.validation");
 
 // Constants
-const { MESSAGE: message } = require("../common/constants");
+const { MESSAGE } = require("../common/constants");
 
 // Environment variables
 const { env } = require("../config");
@@ -15,13 +15,13 @@ const protect = asyncHandler(async (req, res, next) => {
   const accessToken = req.cookies?.accessToken;
 
   if (!accessToken) {
-    throw Boom.unauthorized(`${message.error.auth.unauthorized}, no token provided`);
+    throw Boom.unauthorized(`${MESSAGE.error.auth.unauthorized}, no token provided`);
   }
 
   const [scheme, token] = accessToken.split(" ");
 
   if (scheme !== "Bearer" || !token) {
-    throw Boom.unauthorized(`${message.error.auth.unauthorized}, invalid authorization header`);
+    throw Boom.unauthorized(`${MESSAGE.error.auth.unauthorized}, invalid authorization header`);
   }
 
   try {
@@ -35,7 +35,7 @@ const protect = asyncHandler(async (req, res, next) => {
   } catch (error) {
     console.log(error);
 
-    throw Boom.unauthorized(message.error.auth.unauthorized);
+    throw Boom.unauthorized(MESSAGE.error.auth.unauthorized);
   }
 });
 
