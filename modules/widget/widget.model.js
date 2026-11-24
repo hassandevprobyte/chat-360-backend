@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
 // Constants
-const { MODELS, WIDGET_POSITIONS } = require("../../common/constants");
+const { LOCALES, MODELS, TIMEZONE, WIDGET } = require("../../common/constants");
 
 const preChatFieldSchema = {
   _id: false,
   key: {
     type: String,
-    enum: ["title", "email", "phone", "message"],
+    enum: Object.values(WIDGET.PRE_CHAT_FIELDS),
     required: [true, "key is required"],
   },
   label: {
@@ -17,7 +17,7 @@ const preChatFieldSchema = {
   },
   required: {
     type: Boolean,
-    default: false,
+    default: true,
   },
 };
 
@@ -44,84 +44,92 @@ const businessHoursDaySchema = {
 
 const widgetSettingsSchema = {
   _id: false,
-  primaryColor: {
-    type: String,
-    maxlength: 32,
-    default: "#2563eb",
+  style: {
+    primaryColor: {
+      type: String,
+      maxlength: 32,
+      required: [true, "primary color is required"],
+    },
+    launcherColor: {
+      type: String,
+      maxlength: 32,
+      required: [true, "primary color is required"],
+    },
+    textColor: {
+      type: String,
+      maxlength: 32,
+      required: [true, "primary color is required"],
+    },
+    position: {
+      type: String,
+      enum: Object.values(WIDGET.WIDGET_POSITIONS),
+      required: [true, "position is required"],
+    },
+    offsetX: {
+      type: Number,
+      min: 0,
+      max: 200,
+      required: [true, "offset X is required"],
+    },
+    offsetY: {
+      type: Number,
+      min: 0,
+      max: 200,
+      required: [true, "offset Y is required"],
+    },
   },
-  launcherColor: {
-    type: String,
-    maxlength: 32,
-    default: "#2563eb",
+  message: {
+    welcome: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      required: [true, "welcome message is required"],
+    },
+    offline: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      required: [true, "offline message is required"],
+    },
   },
-  textColor: {
-    type: String,
-    maxlength: 32,
-    default: "#ffffff",
+  header: {
+    logo: {
+      type: String,
+    },
+    avatar: {
+      type: String,
+    },
+    title: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      required: [true, "header title is required"],
+    },
+    subtitle: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      required: [true, "header subtitle is required"],
+    },
   },
-  position: {
-    type: String,
-    enum: Object.values(WIDGET_POSITIONS),
-    default: WIDGET_POSITIONS.BOTTOM_RIGHT,
-  },
-  offsetX: {
-    type: Number,
-    default: 20,
-    min: 0,
-    max: 200,
-  },
-  offsetY: {
-    type: Number,
-    default: 20,
-    min: 0,
-    max: 200,
-  },
-  logo: {
-    type: String,
-    default: null,
-    maxlength: 512,
-  },
-  avatar: {
-    type: String,
-    default: null,
-    maxlength: 512,
-  },
-  headerTitle: {
-    type: String,
-    maxlength: 80,
-    default: "Chat with us",
-  },
-  headerSubtitle: {
-    type: String,
-    maxlength: 140,
-    default: "We usually reply in a few minutes",
-  },
-  welcomeMessage: {
-    type: String,
-    maxlength: 500,
-    default: "Hi there! How can we help?",
-  },
-  offlineMessage: {
-    type: String,
-    maxlength: 500,
-    default: "We are offline right now. Leave a message and we will get back to you.",
-  },
-  launcherText: {
-    type: String,
-    maxlength: 60,
-    default: null,
-  },
-  soundNotification: {
-    type: Boolean,
-    default: true,
-  },
-  fileUploadEnabled: {
-    type: Boolean,
-    default: true,
-  },
-  showAgentAvailability: {
-    type: Boolean,
-    default: true,
+  launcher: {
+    textEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    text: {
+      type: String,
+      required: [
+        function () {
+          return this.textEnabled;
+        },
+        "Launcher text is required when text is enabled.",
+      ],
+    },
+    icon: {
+      type: String,
+      required: [true, "Launcher icon is required"],
+    },
   },
   preChatForm: {
     enabled: {
@@ -130,7 +138,12 @@ const widgetSettingsSchema = {
     },
     fields: {
       type: [preChatFieldSchema],
-      default: () => [{ key: "name", label: "Your name", required: true }],
+      validate: {
+        validator: function (fields) {
+          return !this.enabled || fields.length >= 1;
+        },
+        message: "At least one pre-chat field is required when the pre-chat form is enabled.",
+      },
     },
   },
   businessHours: {
@@ -140,22 +153,20 @@ const widgetSettingsSchema = {
     },
     timezone: {
       type: String,
-      default: "UTC",
-      maxlength: 64,
+      enum: Object.values(TIMEZONE),
+      default: TIMEZONE.UTC,
     },
     days: {
-      type: new mongoose.Schema(
-        {
-          mon: { type: businessHoursDaySchema, default: () => ({}) },
-          tue: { type: businessHoursDaySchema, default: () => ({}) },
-          wed: { type: businessHoursDaySchema, default: () => ({}) },
-          thu: { type: businessHoursDaySchema, default: () => ({}) },
-          fri: { type: businessHoursDaySchema, default: () => ({}) },
-          sat: { type: businessHoursDaySchema, default: () => ({ enabled: false }) },
-          sun: { type: businessHoursDaySchema, default: () => ({ enabled: false }) },
-        },
-        { _id: false },
-      ),
+      type: {
+        mon: { type: businessHoursDaySchema, default: () => ({}) },
+        tue: { type: businessHoursDaySchema, default: () => ({}) },
+        wed: { type: businessHoursDaySchema, default: () => ({}) },
+        thu: { type: businessHoursDaySchema, default: () => ({}) },
+        fri: { type: businessHoursDaySchema, default: () => ({}) },
+        sat: { type: businessHoursDaySchema, default: () => ({ enabled: false }) },
+        sun: { type: businessHoursDaySchema, default: () => ({ enabled: false }) },
+        _id: false,
+      },
       default: () => ({}),
     },
   },
@@ -164,16 +175,43 @@ const widgetSettingsSchema = {
       type: Boolean,
       default: true,
     },
-    brandingText: {
+    logo: {
       type: String,
-      maxlength: 60,
-      default: "Powered by Chat360",
-    },
-    brandingUrl: {
-      type: String,
-      maxlength: 512,
       default: null,
     },
+    text: {
+      type: String,
+      default: "Powered by Chat360",
+    },
+    url: {
+      type: String,
+      default: null,
+    },
+  },
+  locale: {
+    type: String,
+    enum: Object.values(LOCALES),
+    default: LOCALES.EN_US,
+  },
+  soundNotification: {
+    type: Boolean,
+    default: true,
+  },
+  showTypingIndicator: {
+    type: Boolean,
+    default: true,
+  },
+  showAgentAvailability: {
+    type: Boolean,
+    default: false,
+  },
+  fileUploadEnabled: {
+    type: Boolean,
+    default: false,
+  },
+  showQuickReplies: {
+    type: Boolean,
+    default: false,
   },
 };
 
@@ -198,6 +236,10 @@ const schema = new mongoose.Schema(
     publicKey: {
       type: String,
       required: [true, "public key is required"],
+    },
+    secretKey: {
+      type: String,
+      required: [true, "secret key is required"],
     },
     isActive: {
       type: Boolean,

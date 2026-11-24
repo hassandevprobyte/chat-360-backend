@@ -42,7 +42,7 @@ exports.getConversationById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createConversation = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     website: req.body.website,
     widget: req.body.widget,
     visitor: req.body.visitor,
@@ -79,7 +79,7 @@ exports.createConversation = asyncHandler(async (req, res) => {
 exports.updateConversation = asyncHandler(async (req, res) => {
   const payload = {
     id: req.params.id,
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     website: req.body.website,
     widget: req.body.widget,
     visitor: req.body.visitor,

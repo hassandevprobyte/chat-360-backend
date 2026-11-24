@@ -84,7 +84,7 @@ exports.createWorkers = ({ which = Object.keys(exports.PROCESSORS) } = {}) => {
     workers.set(name, worker);
     startedWorkers.push(worker);
 
-    console.log({ queue: name, concurrency }, "Worker started".bgGreen.white);
+    console.log(`${name} Worker started`.bgGreen.white);
   });
 
   return startedWorkers;

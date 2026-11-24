@@ -1,6 +1,6 @@
 const CannedResponse = require("./cannedResponse.model");
 
-const POPULATION_PIPELINE = [{ path: "workspace" }, { path: "user" }];
+const POPULATION_PIPELINE = [{ path: "workspace" }, { path: "user" }, { path: "tags" }];
 
 exports.getAllCannedResponses = async (filters) => {
   return CannedResponse.find(filters).sort({ createdAt: -1 }).populate(POPULATION_PIPELINE).lean();
@@ -26,15 +26,15 @@ exports.getCannedResponseByUserId = async (userId) => {
   return CannedResponse.findOne({ user: userId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getCannedResponseByWorkspaceIdAndUserId = (workspaceId, userId) => {
+exports.getCannedResponseByWorkspaceIdAndUserId = async (workspaceId, userId) => {
   return CannedResponse.findOne({ workspace: workspaceId, user: userId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getCannedResponseByInContext = (workspaceId, userId, cannedResposenId) => {
+exports.getCannedResponseByInContext = async (workspaceId, userId, cannedResposenId) => {
   return CannedResponse.findOne({ workspace: workspaceId, user: userId, _id: cannedResposenId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getCannedResponseByShortcutInContext = (workspaceId, userId, shortcut) => {
+exports.getCannedResponseByShortcutInContext = async (workspaceId, userId, shortcut) => {
   return CannedResponse.findOne({ workspace: workspaceId, user: userId, shortcut }).populate(POPULATION_PIPELINE).lean();
 };
 

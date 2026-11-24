@@ -1,96 +1,117 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { WIDGET_POSITIONS } = require("../../common/constants");
+const { LOCALES, TIMEZONE, WIDGET } = require("../../common/constants");
 
-exports.getWidgetById = Joi.objectId().required();
+const { PRE_CHAT_FIELDS, WIDGET_POSITIONS } = WIDGET;
+
+const preChatFieldSchema = Joi.object({
+  key: Joi.string()
+    .valid(...Object.values(PRE_CHAT_FIELDS))
+    .required(),
+  label: Joi.string().max(80).required(),
+  required: Joi.boolean().default(false),
+});
+
+const businessHoursDaySchema = Joi.object({
+  enabled: Joi.boolean().default(true),
+  from: Joi.number().integer().min(0).max(1440).default(540),
+  to: Joi.number().integer().min(0).max(1440).default(1020),
+});
+
+const businessHoursDaysSchema = Joi.object({
+  mon: businessHoursDaySchema.default({}),
+  tue: businessHoursDaySchema.default({}),
+  wed: businessHoursDaySchema.default({}),
+  thu: businessHoursDaySchema.default({}),
+  fri: businessHoursDaySchema.default({}),
+  sat: businessHoursDaySchema.default({ enabled: false }),
+  sun: businessHoursDaySchema.default({ enabled: false }),
+});
+
+exports.getWidgetById = Joi.object({
+  workspace: Joi.objectId().required(),
+  id: Joi.objectId().required(),
+});
 
 exports.baseSchema = Joi.object({
   workspace: Joi.objectId(),
   website: Joi.objectId(),
   title: Joi.string().trim().max(120),
   publicKey: Joi.string(),
+  secretKey: Joi.string(),
   isActive: Joi.boolean().default(true),
   settings: Joi.object({
-    primaryColor: Joi.string().max(32),
-    launcherColor: Joi.string().max(32),
-    textColor: Joi.string().max(32),
-    position: Joi.string().valid(...Object.values(WIDGET_POSITIONS)),
-    offsetX: Joi.number().min(0).max(200),
-    offsetY: Joi.number().min(0).max(200),
-    logo: Joi.string().max(512).allow(null),
-    avatar: Joi.string().max(512).allow(null),
-    headerTitle: Joi.string().max(80),
-    headerSubtitle: Joi.string().max(140),
-    welcomeMessage: Joi.string().max(500),
-    offlineMessage: Joi.string().max(500),
-    launcherText: Joi.string().max(60).allow(null),
-    soundNotification: Joi.boolean(),
-    fileUploadEnabled: Joi.boolean(),
-    showAgentAvailability: Joi.boolean(),
+    style: Joi.object({
+      primaryColor: Joi.string().max(32).default("#2563eb"),
+      launcherColor: Joi.string().max(32).default("#2563eb"),
+      textColor: Joi.string().max(32).default("#ffffff"),
+      position: Joi.string()
+        .valid(...Object.values(WIDGET_POSITIONS))
+        .default(WIDGET_POSITIONS.BOTTOM_RIGHT),
+      offsetX: Joi.number().min(0).max(200).default(20),
+      offsetY: Joi.number().min(0).max(200).default(20),
+    }),
+    message: Joi.object({
+      welcome: Joi.string().trim().lowercase().default("Hi there! How can we help?"),
+      offline: Joi.string().trim().lowercase().default("We are offline right now. Leave a message and we will get back to you."),
+    }),
+    header: Joi.object({
+      logo: Joi.string().allow(null).default(null),
+      avatar: Joi.string().allow(null).default(null),
+      title: Joi.string().default("Chat with us"),
+      subtitle: Joi.string().default("We usually reply in a few minutes"),
+    }),
+    launcher: Joi.object({
+      textEnabled: Joi.boolean().default(true),
+      text: Joi.string().max(60).when("textEnabled", {
+        is: true,
+        then: Joi.string().required(),
+      }),
+      icon: Joi.string().required(),
+    }),
     preChatForm: Joi.object({
-      enabled: Joi.boolean(),
-      fields: Joi.array().items(
-        Joi.object({
-          key: Joi.string().valid("title", "email", "phone", "message").required(),
-          label: Joi.string().max(80).required(),
-          required: Joi.boolean().default(false),
+      enabled: Joi.boolean().default(false),
+
+      fields: Joi.array()
+        .items(preChatFieldSchema)
+        .default([])
+        .when("enabled", {
+          is: true,
+          then: Joi.array().min(1).required(),
         }),
-      ),
     }),
     businessHours: Joi.object({
-      enabled: Joi.boolean(),
-      timezone: Joi.string().max(64),
-      days: Joi.object({
-        mon: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-        tue: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-        wed: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-        thu: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-        fri: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-        sat: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-        sun: Joi.object({
-          enabled: Joi.boolean(),
-          from: Joi.number().integer().min(0).max(1440),
-          to: Joi.number().integer().min(0).max(1440),
-        }),
-      }),
+      enabled: Joi.boolean().default(false),
+      timezone: Joi.string()
+        .valid(...Object.values(TIMEZONE))
+        .default(TIMEZONE.UTC),
+      days: businessHoursDaysSchema.default({}),
     }),
     branding: Joi.object({
-      showBranding: Joi.boolean(),
-      brandingText: Joi.string().max(60),
-      brandingUrl: Joi.string().max(512).allow(null),
+      showBranding: Joi.boolean().default(true),
+      logo: Joi.string().allow(null).default(null),
+      text: Joi.string().default("Powered by Chat360"),
+      url: Joi.string().allow(null).default(null),
     }),
+    locale: Joi.string()
+      .valid(...Object.values(LOCALES))
+      .default(LOCALES.EN_US),
+    soundNotification: Joi.boolean().default(true),
+    showTypingIndicator: Joi.boolean().default(true),
+    showAgentAvailability: Joi.boolean().default(false),
+    fileUploadEnabled: Joi.boolean().default(false),
+    showQuickReplies: Joi.boolean().default(false),
   }),
   deletedAt: Joi.date().allow(null),
 });
 
 exports.createWidget = exports.baseSchema
   .fork(["workspace", "website", "title"], (schema) => schema.required())
-  .fork(["publicKey", "deletedAt"], (schema) => schema.strip())
-  .fork("isActive", (schema) => schema.default(true));
+  .fork(["publicKey", "secretKey", "deletedAt"], (schema) => schema.strip());
 
-exports.updateWidget = exports.baseSchema.append({ id: Joi.objectId().required() }).fork(["workspace", "website", "publicKey", "deletedAt"], (schema) => schema.strip());
+exports.updateWidget = exports.baseSchema
+  .append({
+    id: Joi.objectId().required(),
+  })
+  .fork(["website", "publicKey", "secretKey", "deletedAt"], (schema) => schema.strip());

@@ -7,7 +7,12 @@ const tagService = require("./tag.service");
 // @route   GET /api/v1/tags/all
 // @access  Private
 exports.getAllTags = asyncHandler(async (req, res) => {
-  const data = await tagService.getAllTags(req.filters);
+  const filters = {
+    ...req.filters,
+    workspace: req.context?.workspace?._id,
+  };
+
+  const data = await tagService.getAllTags(filters);
 
   res.status(200).json(data);
 });
@@ -17,7 +22,7 @@ exports.getAllTags = asyncHandler(async (req, res) => {
 // @access  Private
 exports.getTagsWithPagination = asyncHandler(async (req, res) => {
   const payload = {
-    filters: req.filters,
+    filters: { ...req.filters, workspace: req.context?.workspace?._id },
     page: req.pagination.page,
     pageSize: req.pagination.pageSize,
     sort: req.pagination.sort,
@@ -32,7 +37,12 @@ exports.getTagsWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/tags/:id
 // @access  Private
 exports.getTagById = asyncHandler(async (req, res) => {
-  const data = await tagService.getTagById(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await tagService.getTagById(payload);
 
   res.status(200).json(data);
 });
@@ -42,13 +52,12 @@ exports.getTagById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createTag = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     title: req.body.title,
-    titleKey: req.body.titleKey,
     color: req.body.color,
     description: req.body.description,
     isActive: req.body.isActive,
-    createdBy: req.context?.user._id,
+    createdBy: req.context?.user?._id,
     metadata: req.body.metadata,
   };
 
@@ -62,14 +71,12 @@ exports.createTag = asyncHandler(async (req, res) => {
 // @access  Private
 exports.updateTag = asyncHandler(async (req, res) => {
   const payload = {
+    workspace: req.context?.workspace?._id,
     id: req.params.id,
-    workspace: req.context?.workspaceId,
     title: req.body.title,
-    titleKey: req.body.titleKey,
     color: req.body.color,
     description: req.body.description,
     isActive: req.body.isActive,
-    createdBy: req.context?.user._id,
     metadata: req.body.metadata,
   };
 
@@ -82,7 +89,12 @@ exports.updateTag = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/tags/:id
 // @access  Private
 exports.deleteTag = asyncHandler(async (req, res) => {
-  const data = await tagService.deleteTag(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await tagService.deleteTag(payload);
 
   res.status(200).json(data);
 });

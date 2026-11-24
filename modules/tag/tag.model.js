@@ -13,14 +13,15 @@ const schema = new mongoose.Schema(
     title: {
       type: String,
       trim: true,
+      lowercase: true,
       maxlength: 40,
       required: [true, "title is required"],
     },
     titleKey: {
       type: String,
-      lowercase: true,
       trim: true,
-      maxlength: 40,
+      lowercase: true,
+      maxlength: 41,
       required: [true, "title key is required"],
     },
     color: {
@@ -40,7 +41,6 @@ const schema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: MODELS.USER,
-      default: null,
     },
     metadata: {
       type: mongoose.Schema.Types.Mixed,
@@ -50,7 +50,7 @@ const schema = new mongoose.Schema(
   { timestamps: true, versionKey: false },
 );
 
-schema.index({ workspace: 1, nameKey: 1 }, { unique: true });
+schema.index({ workspace: 1, title: 1 }, { unique: true });
 schema.index({ workspace: 1, isActive: 1, name: 1 });
 
 module.exports = mongoose.model(MODELS.TAG, schema);

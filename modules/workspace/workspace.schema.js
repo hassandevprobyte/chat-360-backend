@@ -1,7 +1,7 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { COLORS, CURRENCY, LOCALES, STATUSES, TIMEZONE } = require("../../common/constants");
+const { COLORS, CURRENCY, LOCALES, STATUSES, TIMEZONE, WORKSPACE } = require("../../common/constants");
 
 // Environment Variables
 const { env } = require("../../config");
@@ -13,7 +13,11 @@ exports.getWorkspaceBySlug = Joi.string().trim().length(env.WORKSPACE.SLUG_LENGT
 exports.baseSchema = Joi.object({
   user: Joi.objectId(),
   title: Joi.string().trim().lowercase(),
-  description: Joi.string().trim().lowercase(),
+  email: Joi.string().email(),
+  website: Joi.string().uri(),
+  industry: Joi.string().valid(...Object.values(WORKSPACE.INDUSTRY)),
+  companySize: Joi.string().valid(...Object.values(WORKSPACE.COMPANY_SIZE)),
+  description: Joi.string().trim().lowercase().allow(""),
   status: Joi.string()
     .trim()
     .valid(...Object.values(STATUSES.WORKSPACE))
@@ -33,6 +37,7 @@ exports.baseSchema = Joi.object({
     timezone: Joi.string().valid(...Object.values(TIMEZONE)),
     currency: Joi.string().valid(...Object.values(CURRENCY)),
     locale: Joi.string().valid(...Object.values(LOCALES)),
+    allowedIPs: Joi.array().items(Joi.string().ip({ version: ["ipv4", "ipv6"] })),
   }),
 });
 

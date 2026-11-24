@@ -10,6 +10,9 @@ const widgetValidation = require("./widget.validation");
 const websiteValidation = require("../website/website.validation");
 const workspaceValidation = require("../workspace/workspace.validation");
 
+// Common
+const generators = require("../../common/generators");
+
 exports.getAllWidgets = async (filters) => {
   return widgetRepository.getAllWidgets(filters);
 };
@@ -25,10 +28,10 @@ exports.getWidgetsWithPagination = async (payload) => {
   return { data: widgets, meta };
 };
 
-exports.getWidgetById = async (widgetId) => {
-  joi.validate(widgetId, joiSchema.getWidgetById);
+exports.getWidgetById = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getWidgetById);
 
-  return widgetValidation.throwErrorIfWidgetDoesNotExist(widgetId);
+  return widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 };
 
 exports.createWidget = async (payload) => {
@@ -36,12 +39,15 @@ exports.createWidget = async (payload) => {
 
   await Promise.all([
     workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.website),
+    websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.website),
   ]);
 
   if (validatedPayload.isActive === true) {
     await widgetRepository.deactivateAllWidgets(validatedPayload.workspace, validatedPayload.website);
   }
+
+  validatedPayload.publicKey = generators.generateRandomToken({ prefix: "pk", bytes: 16, encoding: "base64url" });
+  validatedPayload.secretKey = generators.generateRandomToken({ prefix: "sk", bytes: 48, encoding: "base64url" });
 
   return widgetRepository.createWidget(validatedPayload);
 };
@@ -49,7 +55,7 @@ exports.createWidget = async (payload) => {
 exports.updateWidget = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateWidget);
 
-  const existingWidget = await widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.id);
+  const existingWidget = await widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.workspace, validatedPayload.id);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existingWidget?.title) {
@@ -72,12 +78,12 @@ exports.updateWidget = async (payload) => {
   return widgetRepository.updateWidgetById(validatedPayload.id, updatePayload);
 };
 
-exports.deleteWidget = async (widgetId) => {
-  joi.validate(widgetId, joiSchema.getWidgetById);
+exports.deleteWidget = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getWidgetById);
 
-  await widgetValidation.throwErrorIfWidgetDoesNotExist(widgetId);
+  await widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 
-  await widgetRepository.deleteWidgetById(widgetId);
+  await widgetRepository.deleteWidgetById(validatedPayload.id);
 
-  return { deletedId: widgetId };
+  return { deletedId: validatedPayload.id };
 };

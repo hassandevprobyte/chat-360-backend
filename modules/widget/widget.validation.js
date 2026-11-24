@@ -6,8 +6,8 @@ const widgetRepository = require("./widget.repository");
 // Constants
 const { MESSAGE: message } = require("../../common/constants");
 
-exports.throwErrorIfWidgetDoesNotExist = async (widgetId) => {
-  const widget = await widgetRepository.getWidgetById(widgetId);
+exports.throwErrorIfWidgetDoesNotExist = async (workspaceId, widgetId) => {
+  const widget = await widgetRepository.getWidgetById(workspaceId, widgetId);
 
   if (!widget) {
     throw Boom.notFound(message.error.widget.notFound);

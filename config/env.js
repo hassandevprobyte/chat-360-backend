@@ -8,6 +8,7 @@ const envSchema = Joi.object({
   APP_NAME: Joi.string().default("chat360"),
   API_URL: Joi.string().uri().required(),
   APP_URL: Joi.string().uri().required(),
+  WIDGET_URL: Joi.string().uri().required(),
   MONGODB_URI: Joi.string().uri().required(),
 
   REDIS_URL: Joi.string().uri().required(),
@@ -62,6 +63,7 @@ const env = {
   APP_NAME: envVars.APP_NAME,
   API_URL: envVars.API_URL,
   APP_URL: envVars.APP_URL,
+  WIDGET_URL: envVars.WIDGET_URL,
   MONGODB_URI: envVars.MONGODB_URI,
   REDIS: {
     URL: envVars.JWT_REDIS_URL,

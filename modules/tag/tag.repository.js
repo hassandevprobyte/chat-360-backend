@@ -1,6 +1,6 @@
 const Tag = require("./tag.model");
 
-const POPULATION_PIPELINE = [{ path: "workspace" }];
+const POPULATION_PIPELINE = [{ path: "workspace" }, { path: "createdBy" }];
 
 exports.getAllTags = async (filters) => {
   return Tag.find(filters).sort({ createdAt: -1 }).populate(POPULATION_PIPELINE).lean();
@@ -14,16 +14,16 @@ exports.getTagsCount = async (filters) => {
   return Tag.countDocuments(filters);
 };
 
-exports.getTagById = async (tagId) => {
-  return Tag.findById(tagId).populate(POPULATION_PIPELINE).lean();
+exports.getTagById = async (workspaceId, tagId) => {
+  return Tag.findOne({ workspace: workspaceId, _id: tagId }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.getTagByWorkspaceId = async (workspaceId) => {
   return Tag.findOne({ workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getTagByTitleKeyAndWorkspaceId = async (titleKey, workspaceId) => {
-  return Tag.findOne({ titleKey, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
+exports.getTagByTitle = async (workspaceId, title) => {
+  return Tag.findOne({ workspace: workspaceId, title }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.createTag = async (payload) => {

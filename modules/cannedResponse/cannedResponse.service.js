@@ -1,3 +1,5 @@
+const lodash = require("lodash");
+
 // Repositories
 const cannedResponseRepository = require("./cannedResponse.repository");
 
@@ -7,6 +9,27 @@ const joiSchema = require("./cannedResponse.schema");
 const cannedResponseValidation = require("./cannedResponse.validation");
 const userValidation = require("../user/user.validation");
 const workspaceValidation = require("../workspace/workspace.validation");
+
+// Common
+const { CANNED_RESPONSE } = require("../../common/constants");
+
+exports.extractPlaceholders = (content) => {
+  const placeholders = [...content.matchAll(CANNED_RESPONSE.PLACEHOLDER_REGEX)];
+
+  return [...new Set(placeholders.map((match) => match[1]))];
+};
+
+exports.renderTemplate = (content, variables = {}) => {
+  return content.replace(PLACEHOLDER_REGEX, (match, key) => {
+    if (!Object.hasOwn(variables, key)) {
+      return match;
+    }
+
+    const value = variables[key];
+
+    return value == null ? "" : String(value);
+  });
+};
 
 exports.getAllCannedResponses = async (filters) => {
   return cannedResponseRepository.getAllCannedResponses(filters);
@@ -43,9 +66,11 @@ exports.createCannedResponse = async (payload) => {
   await Promise.all([
     userValidation.throwErrorIfUserDoesNotExist(validatedPayload.user),
     workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(validatedPayload.workspace, validatedPayload.shortcut, validatedPayload.user),
+    cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(validatedPayload.workspace, validatedPayload.user, validatedPayload.shortcut),
     cannedResponseValidation.throwErrorIfMaximumNumberOfCannedResponsesReached(validatedPayload.workspace, validatedPayload.user),
   ]);
+
+  validatedPayload.placeholders = exports.extractPlaceholders(validatedPayload.content);
 
   return cannedResponseRepository.createCannedResponse(validatedPayload);
 };
@@ -58,7 +83,24 @@ exports.updateCannedResponse = async (payload) => {
     validatedPayload.user,
     validatedPayload.id,
   );
+
   const updatePayload = {};
+
+  if (validatedPayload.title && validatedPayload.title !== existingCannedResponse?.title) {
+    updatePayload.title = validatedPayload.title;
+  }
+
+  if (validatedPayload.category && validatedPayload.category !== existingCannedResponse?.category) {
+    updatePayload.category = validatedPayload.category;
+  }
+
+  if (validatedPayload.visibility && validatedPayload.visibility !== existingCannedResponse?.visibility) {
+    updatePayload.visibility = validatedPayload.visibility;
+  }
+
+  if (validatedPayload.tags && !lodash.isEqual(validatedPayload.tags, existingCannedResponse.tags)) {
+    updatePayload.tags = validatedPayload.tags;
+  }
 
   if (validatedPayload.shortcut && validatedPayload.shortcut !== existingCannedResponse?.shortcut) {
     await cannedResponseValidation.throwErrorIfCannedResponseShortcutExistsInContext(validatedPayload.workspace, validatedPayload.user, validatedPayload.shortcut);
@@ -68,6 +110,7 @@ exports.updateCannedResponse = async (payload) => {
 
   if (validatedPayload.content && validatedPayload.content !== existingCannedResponse?.content) {
     updatePayload.content = validatedPayload.content;
+    updatePayload.placeholders = exports.extractPlaceholders(validatedPayload.content);
   }
 
   if (validatedPayload.isActive !== undefined && validatedPayload.isActive !== existingCannedResponse?.isActive) {

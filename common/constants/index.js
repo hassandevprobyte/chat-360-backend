@@ -14,13 +14,43 @@ exports.MODELS = Object.freeze({
   WORKSPACE: "Workspace",
 });
 
-exports.PLATFORM_ROLES = Object.freeze({ USER: "USER", SUPER_ADMIN: "SUPER_ADMIN" });
+exports.PLATFORM_ROLES = Object.freeze({ USER: "user", SUPER_ADMIN: "super_admin" });
 
-exports.WORKSPACE_ROLES = Object.freeze({ OWNER: "OWNER", AGENT: "AGENT" });
+exports.WORKSPACE_ROLES = Object.freeze({ OWNER: "owner", ADMIN: "admin", SUPERVISOR: "supervisor", AGENT: "agent", VIEWER: "viewer" });
 
 exports.PERMISSIONS = Object.freeze({
   SUPER_ADMIN: ["*"],
   OWNER: {
+    [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.AUDIT_LOG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CANNED_RESPONSE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CONVERSATION]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.MESSAGE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.PICKLIST]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.ROLE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.TAG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.USER]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.VISITOR]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WEBSITE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+  },
+  ADMIN: {
+    [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.AUDIT_LOG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CANNED_RESPONSE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CONVERSATION]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.MESSAGE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.PICKLIST]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.ROLE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.TAG]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.USER]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.VISITOR]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WEBSITE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+  },
+  SUPERVISOR: {
     [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE", "DELETE"],
     [exports.MODELS.AUDIT_LOG]: ["CREATE", "READ", "UPDATE", "DELETE"],
     [exports.MODELS.CANNED_RESPONSE]: ["CREATE", "READ", "UPDATE", "DELETE"],
@@ -50,6 +80,21 @@ exports.PERMISSIONS = Object.freeze({
     [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE", "DELETE"],
     [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
   },
+  VIEWER: {
+    [exports.MODELS.ATTACHMENT]: ["READ"],
+    [exports.MODELS.AUDIT_LOG]: ["READ"],
+    [exports.MODELS.CANNED_RESPONSE]: ["READ"],
+    [exports.MODELS.CONVERSATION]: ["READ"],
+    [exports.MODELS.MESSAGE]: ["READ"],
+    [exports.MODELS.PICKLIST]: ["READ"],
+    [exports.MODELS.ROLE]: ["READ"],
+    [exports.MODELS.TAG]: ["READ"],
+    [exports.MODELS.USER]: ["READ"],
+    [exports.MODELS.VISITOR]: ["READ"],
+    [exports.MODELS.WEBSITE]: ["READ"],
+    [exports.MODELS.WIDGET]: ["READ"],
+    [exports.MODELS.WORKSPACE]: ["READ"],
+  },
 });
 
 exports.COLORS = Object.freeze({
@@ -76,14 +121,10 @@ exports.CONVERSATION_PRIORITY = Object.freeze({
 });
 
 exports.VERIFICATION_METHODS = Object.freeze({
-  DNS_TXT: "DNS_TXT",
-  META_TAG: "META_TAG",
-  FILE_UPLOAD: "FILE_UPLOAD",
+  DNS_TXT: "dns_txt",
+  META_TAG: "meta_tag",
+  FILE_UPLOAD: "file_upload",
 });
-
-exports.WIDGET_POSITIONS = Object.freeze({ BOTTOM_RIGHT: "BOTTOM_RIGHT", BOTTOM_LEFT: "BOTTOM_LEFT" });
-
-exports.ATTACHMENT_RESOURCES = Object.freeze({ MESSAGE: "MESSAGE", CONVERSATION: "CONVERSATION", WIDGET: "WIDGET" });
 
 exports.QUEUE_NAMES = Object.freeze({
   EMAIL: "email",
@@ -98,41 +139,6 @@ exports.JOB_NAMES = Object.freeze({
   CLEANUP_STALE_VISITORS: "cleanup-stale-visitors",
   CLEANUP_EXPIRED_INVITATIONS: "cleanup-expired-invitations",
 });
-
-exports.AUDIT_ACTIONS = Object.freeze({
-  WORKSPACE_CREATED: "workspace.created",
-  WORKSPACE_UPDATED: "workspace.updated",
-  WORKSPACE_SUSPENDED: "workspace.suspended",
-  WORKSPACE_REACTIVATED: "workspace.reactivated",
-  MEMBER_INVITED: "member.invited",
-  MEMBER_JOINED: "member.joined",
-  MEMBER_REMOVED: "member.removed",
-  MEMBER_ROLE_CHANGED: "member.role_changed",
-  MEMBER_UPDATED: "member.updated",
-  WEBSITE_CREATED: "website.created",
-  WEBSITE_UPDATED: "website.updated",
-  WEBSITE_DELETED: "website.deleted",
-  WEBSITE_VERIFICATION_TOKEN_ROTATED: "website.verification_token_rotated",
-  WEBSITE_VERIFIED: "website.verified",
-  WEBSITE_VERIFICATION_FAILED: "website.verification_failed",
-  WIDGET_CREATED: "widget.created",
-  WIDGET_UPDATED: "widget.updated",
-  WIDGET_DELETED: "widget.deleted",
-  WIDGET_KEY_ROTATED: "widget.key_rotated",
-  CONVERSATION_ASSIGNED: "conversation.assigned",
-  CONVERSATION_UNASSIGNED: "conversation.unassigned",
-  CONVERSATION_CLOSED: "conversation.closed",
-  CONVERSATION_REOPENED: "conversation.reopened",
-  CONVERSATION_TAGS_CHANGED: "conversation.tags_changed",
-  TAG_CREATED: "tag.created",
-  TAG_UPDATED: "tag.updated",
-  TAG_DELETED: "tag.deleted",
-  SETTINGS_UPDATED: "settings.updated",
-  SUPER_ADMIN_INSPECTED_CONVERSATION: "super_admin.conversation_inspected",
-  SUPER_ADMIN_VIEWED_WORKSPACE: "super_admin.workspace_viewed",
-});
-
-exports.CANNED_RESPONSE = Object.freeze({ MAX_PER_USER: 100, SHORTCUT_REGEX: /^\/[a-z0-9][a-z0-9._-]*$/i });
 
 exports.MESSAGE = Object.freeze({
   error: {
@@ -201,6 +207,9 @@ exports.MESSAGE = Object.freeze({
     website: {
       notFound: "website not found",
       domainExists: "website domain already exists",
+    },
+    widget: {
+      notFound: "widget not found",
     },
     workspace: {
       notFound: "Workspace not found",
@@ -728,4 +737,41 @@ exports.STATUSES = Object.freeze({
   CONVERSATION: { OPEN: "open", PENDING: "pending", CLOSED: "closed" },
   WEBSITE: { ACTIVE: "active", INACTIVE: "inactive", PENDING: "pending" },
   VERIFICATION: { UNVERIFIED: "unverified", PENDING: "pending", VERIFIED: "verified", FAILED: "failed" },
+});
+
+exports.WIDGET = Object.freeze({
+  WIDGET_POSITIONS: { BOTTOM_RIGHT: "bottom_right", BOTTOM_LEFT: "bottom_left" },
+  PRE_CHAT_FIELDS: { TITLE: "title", EMAIL: "email", PHONE: "phone", COMPANY: "company", MESSAGE: "message" },
+});
+
+exports.CANNED_RESPONSE = Object.freeze({
+  CATEGORY: {
+    GENERAL: "general",
+    BILLING: "billing",
+    TECHNICAL: "technical",
+    ONBOARDING: "onboarding",
+    SALES: "sales",
+  },
+  VISIBILITY: { SHARED: "shared", PRIVATE: "private" },
+  MAX_PER_USER: 100,
+  SHORTCUT_REGEX: /^\/[a-z0-9][a-z0-9._-]*$/i,
+  PLACEHOLDER_REGEX: /{{\s*([a-zA-Z0-9_]+)\s*}}/g,
+});
+
+exports.WORKSPACE = Object.freeze({
+  INDUSTRY: {
+    SOFTWARE: "software",
+    E_COMMERCE: "e_commerce",
+    FINIANCIAL_SERVICES: "finiancial_services",
+    EDUCATION: "education",
+    HEALTHCARE: "healthcare",
+    OTHER: "other",
+  },
+  COMPANY_SIZE: {
+    SMALL: "1-10",
+    MEDIUM: "11-50",
+    LARGE: "51-200",
+    VERY_LARGE: "201-1000",
+    ENTERPRISE: "1000+",
+  },
 });

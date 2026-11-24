@@ -1,3 +1,5 @@
+const lodash = require("lodash");
+
 // Repositories
 const tagRepository = require("./tag.repository");
 
@@ -22,10 +24,10 @@ exports.getTagsWithPagination = async (payload) => {
   return { data: tags, meta };
 };
 
-exports.getTagById = async (tagId) => {
-  joi.validate(tagId, joiSchema.getTagById);
+exports.getTagById = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getTagById);
 
-  return tagValidation.throwErrorIfTagDoesNotExist(tagId);
+  return tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 };
 
 exports.createTag = async (payload) => {
@@ -33,8 +35,10 @@ exports.createTag = async (payload) => {
 
   await Promise.all([
     workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    tagValidation.throwErrorIfTagTitleKeyExists(validatedPayload.titleKey, validatedPayload.workspace),
+    tagValidation.throwErrorIfTagTitleExists(validatedPayload.workspace, validatedPayload.title),
   ]);
+
+  validatedPayload.titleKey = `#${validatedPayload.title}`;
 
   return tagRepository.createTag(validatedPayload);
 };
@@ -42,19 +46,16 @@ exports.createTag = async (payload) => {
 exports.updateTag = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateTag);
 
-  const existinhTag = await tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.id);
+  const existinhTag = await tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.workspace, validatedPayload.id);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existinhTag?.title) {
+    await tagValidation.throwErrorIfTagTitleExists(String(existinhTag?.workspace?._id), validatedPayload.title);
     updatePayload.title = validatedPayload.title;
+    updatePayload.titleKey = `#${validatedPayload.title}`;
   }
 
-  if (validatedPayload.titleKey && validatedPayload.titleKey !== existinhTag?.titleKey) {
-    await tagValidation.throwErrorIfTagTitleKeyExists(validatedPayload.titleKey, String(existinhTag?.workspace?._id));
-    updatePayload.titleKey = validatedPayload.titleKey;
-  }
-
-  if (validatedPayload.color !== undefined && validatedPayload.color !== existinhTag?.color) {
+  if (validatedPayload.color && validatedPayload.color !== existinhTag?.color) {
     updatePayload.color = validatedPayload.color;
   }
 
@@ -66,7 +67,7 @@ exports.updateTag = async (payload) => {
     updatePayload.isActive = validatedPayload.isActive;
   }
 
-  if (validatedPayload.metadata && validatedPayload.metadata !== existinhTag?.metadata) {
+  if (validatedPayload.metadata && !lodash.isEqual(validatedPayload.metadata, existinhTag?.metadata)) {
     updatePayload.metadata = validatedPayload.metadata;
   }
 
@@ -75,12 +76,12 @@ exports.updateTag = async (payload) => {
   return tagRepository.updateTagById(validatedPayload.id, updatePayload);
 };
 
-exports.deleteTag = async (tagId) => {
-  joi.validate(tagId, joiSchema.getTagById);
+exports.deleteTag = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getTagById);
 
-  await tagValidation.throwErrorIfTagDoesNotExist(tagId);
+  await tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.workspace, validatedPayload.id);
 
-  await tagRepository.deleteTagById(tagId);
+  await tagRepository.deleteTagById(validatedPayload.id);
 
-  return { deletedId: tagId };
+  return { deletedId: validatedPayload.id };
 };

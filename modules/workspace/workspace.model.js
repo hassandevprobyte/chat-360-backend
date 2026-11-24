@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Constants
-const { COLORS, CURRENCY, LOCALES, MODELS, STATUSES, TIMEZONE } = require("../../common/constants");
+const { COLORS, CURRENCY, LOCALES, MODELS, STATUSES, TIMEZONE, WORKSPACE, WORKSPACE_ROLES } = require("../../common/constants");
 
 const agentschema = {
   _id: false,
@@ -9,6 +9,11 @@ const agentschema = {
     type: mongoose.Schema.Types.ObjectId,
     ref: MODELS.USER,
     required: [true, "user is required"],
+  },
+  role: {
+    type: String,
+    enum: Object.values(WORKSPACE_ROLES),
+    default: WORKSPACE_ROLES.AGENT,
   },
   assignedAt: {
     type: Date,
@@ -38,6 +43,12 @@ const settingSchema = {
     enum: Object.values(LOCALES),
     default: LOCALES.EN_US,
   },
+  allowedIPs: [
+    {
+      type: String,
+      trim: true,
+    },
+  ],
 };
 
 const schema = new mongoose.Schema(
@@ -53,6 +64,24 @@ const schema = new mongoose.Schema(
       lowercase: true,
       required: [true, "title is required"],
     },
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    website: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    industry: {
+      type: String,
+      enum: Object.values(WORKSPACE.INDUSTRY),
+    },
+    comapnySize: {
+      type: String,
+      enum: Object.values(WORKSPACE.COMPANY_SIZE),
+    },
     description: {
       type: String,
       trim: true,
@@ -63,6 +92,10 @@ const schema = new mongoose.Schema(
       trim: true,
       required: [true, "slug is required"],
     },
+    image: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: MODELS.ATTACHMENT,
+    },
     status: {
       type: String,
       enum: Object.values(STATUSES.WORKSPACE),
@@ -71,10 +104,6 @@ const schema = new mongoose.Schema(
     agents: {
       type: [agentschema],
       default: [],
-      validate: {
-        validator: (agents) => new Set(agents.map((agent) => String(agent.user))).size === agents.length,
-        message: "workspace agents must be unique",
-      },
     },
     settings: {
       type: settingSchema,

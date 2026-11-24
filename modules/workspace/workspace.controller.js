@@ -44,13 +44,22 @@ exports.createWorkspace = asyncHandler(async (req, res) => {
   const payload = {
     user: req.context?.user?._id,
     title: req.body.title,
+    email: req.body.email,
+    website: req.body.website,
+    industry: req.body.industry,
+    companySize: req.body.companySize,
     description: req.body.description,
     status: req.body.status,
     agents: req.body.agents,
     settings: req.body.settings,
   };
 
-  const data = await workspaceService.createWorkspace(payload);
+  const attachmentPayload = {
+    image: req.files?.image,
+    uploadedBy: req.context?.user?._id,
+  };
+
+  const data = await workspaceService.createWorkspace(payload, attachmentPayload);
 
   res.status(201).json(data);
 });
@@ -62,13 +71,22 @@ exports.updateWorkspace = asyncHandler(async (req, res) => {
   const payload = {
     id: req?.context?.workspace?._id || req.params.id,
     title: req.body.title,
+    email: req.body.email,
+    website: req.body.website,
+    industry: req.body.industry,
+    companySize: req.body.companySize,
     description: req.body.description,
     status: req.body.status,
     agents: req.body.agents,
     settings: req.body.settings,
   };
 
-  const data = await workspaceService.updateWorkspace(payload);
+  const attachmentPayload = {
+    image: req.files?.image,
+    uploadedBy: req.context?.user?._id,
+  };
+
+  const data = await workspaceService.updateWorkspace(payload, attachmentPayload);
 
   res.status(200).json(data);
 });

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Constants
-const { MODELS } = require("../../common/constants");
+const { CANNED_RESPONSE, MODELS } = require("../../common/constants");
 
 const schema = new mongoose.Schema(
   {
@@ -15,17 +15,41 @@ const schema = new mongoose.Schema(
       ref: MODELS.USER,
       required: [true, "user is required"],
     },
+    title: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      required: [true, "title is required"],
+    },
+    category: {
+      type: String,
+      enum: Object.values(CANNED_RESPONSE.CATEGORY),
+      required: [true, "category is required"],
+    },
+    visibility: {
+      type: String,
+      enum: Object.values(CANNED_RESPONSE.VISIBILITY),
+      default: CANNED_RESPONSE.VISIBILITY.SHARED,
+    },
+    tags: {
+      type: [{ type: String, trim: true, lowercase: true }],
+      default: [],
+    },
     shortcut: {
       type: String,
       trim: true,
       lowercase: true,
-      maxlength: 40,
+      maxlength: 41,
       required: [true, "shortcut is required"],
     },
     content: {
       type: String,
       maxlength: 4000,
       required: [true, "content is required"],
+    },
+    placeholders: {
+      type: [String],
+      default: [],
     },
     isActive: {
       type: Boolean,

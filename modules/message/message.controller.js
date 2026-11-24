@@ -42,7 +42,7 @@ exports.getMessageById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createMessage = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     conversation: req.body.conversation,
     senderType: req.body.senderType,
     sender: req.body.sender,
@@ -57,7 +57,7 @@ exports.createMessage = asyncHandler(async (req, res) => {
 
   const attachmentPayload = {
     attachments: req.files?.attachments,
-    uploadedBy: req.context?.user._id,
+    uploadedBy: req.context?.user?._id,
   };
 
   const data = await messageService.createMessage(payload, attachmentPayload);
@@ -71,7 +71,7 @@ exports.createMessage = asyncHandler(async (req, res) => {
 exports.updateMessage = asyncHandler(async (req, res) => {
   const payload = {
     id: req.params.id,
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     conversation: req.body.conversation,
     senderType: req.body.senderType,
     sender: req.body.sender,
@@ -87,7 +87,7 @@ exports.updateMessage = asyncHandler(async (req, res) => {
 
   const attachmentPayload = {
     attachments: req.files?.attachments,
-    uploadedBy: req.context?.user._id,
+    uploadedBy: req.context?.user?._id,
   };
 
   const data = await messageService.updateMessage(payload, attachmentPayload);

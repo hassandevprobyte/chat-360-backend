@@ -28,7 +28,8 @@ const checkPermissions = (resource) => (req, res, next) => {
     throw Boom.forbidden(MESSAGE.error.auth.forbidden);
   }
 
-  const permissions = PERMISSIONS[workspaceAccess.role]?.[resource] || [];
+  const role = workspaceAccess.role?.toUpperCase();
+  const permissions = PERMISSIONS[role]?.[resource] || [];
 
   if (permissions.includes(action)) {
     return next();

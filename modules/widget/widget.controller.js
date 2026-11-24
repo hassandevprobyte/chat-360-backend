@@ -7,7 +7,9 @@ const widgetService = require("./widget.service");
 // @route   GET /api/v1/widgets/all
 // @access  Private
 exports.getAllWidgets = asyncHandler(async (req, res) => {
-  const data = await widgetService.getAllWidgets(req.filters);
+  const filters = { ...req.filters, workspace: req.context?.workspace?._id };
+
+  const data = await widgetService.getAllWidgets(filters);
 
   res.status(200).json(data);
 });
@@ -17,7 +19,7 @@ exports.getAllWidgets = asyncHandler(async (req, res) => {
 // @access  Private
 exports.getWidgetsWithPagination = asyncHandler(async (req, res) => {
   const payload = {
-    filters: req.filters,
+    filters: { ...req.filters, workspace: req.context?.workspace?._id },
     page: req.pagination.page,
     pageSize: req.pagination.pageSize,
     sort: req.pagination.sort,
@@ -32,7 +34,12 @@ exports.getWidgetsWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/widgets/:id
 // @access  Private
 exports.getWidgetById = asyncHandler(async (req, res) => {
-  const data = await widgetService.getWidgetById(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await widgetService.getWidgetById(payload);
 
   res.status(200).json(data);
 });
@@ -42,10 +49,9 @@ exports.getWidgetById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createWidget = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id,
     website: req.body.website,
     title: req.body.title,
-    publicKey: req.body.publicKey,
     isActive: req.body.isActive,
     settings: req.body.settings,
     deletedAt: req.body.deletedAt,
@@ -61,6 +67,7 @@ exports.createWidget = asyncHandler(async (req, res) => {
 // @access  Private
 exports.updateWidget = asyncHandler(async (req, res) => {
   const payload = {
+    workspace: req.context?.workspace?._id,
     id: req.params.id,
     title: req.body.title,
     isActive: req.body.isActive,
@@ -76,7 +83,12 @@ exports.updateWidget = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/widgets/:id
 // @access  Private
 exports.deleteWidget = asyncHandler(async (req, res) => {
-  const data = await widgetService.deleteWidget(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await widgetService.deleteWidget(payload);
 
   res.status(200).json(data);
 });
