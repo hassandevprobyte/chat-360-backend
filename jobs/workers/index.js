@@ -12,28 +12,28 @@ const { QUEUE_NAMES } = require("../../common/constants");
 const workers = new Map();
 
 exports.PROCESSORS = {
-  [QUEUE_NAMES.EMAIL]: {
-    processor: () => {
-      return true;
-    },
-    concurrency: env.WORKER.CONCURRENCY,
-  },
-  [QUEUE_NAMES.NOTIFICATIONS]: {
-    processor: () => {
-      return true;
-    },
-    concurrency: env.WORKER.CONCURRENCY,
-  },
-  [QUEUE_NAMES.CLEANUP]: {
-    processor: () => {
-      return true;
-    },
-    concurrency: 1,
-  },
+  // [QUEUE_NAMES.EMAIL]: {
+  //   processor: () => {
+  //     return true;
+  //   },
+  //   concurrency: env.WORKER.CONCURRENCY,
+  // },
+  // [QUEUE_NAMES.NOTIFICATIONS]: {
+  //   processor: () => {
+  //     return true;
+  //   },
+  //   concurrency: env.WORKER.CONCURRENCY,
+  // },
+  // [QUEUE_NAMES.CLEANUP]: {
+  //   processor: () => {
+  //     return true;
+  //   },
+  //   concurrency: 1,
+  // },
 };
 
 exports.createWorkers = ({ which = Object.keys(exports.PROCESSORS) } = {}) => {
-  if (!redis.isRedisEnabled()) {
+  if (redis.isRedisDisabled()) {
     console.log("Workers not started: Redis is unavailable".bgRed.white);
     return [];
   }

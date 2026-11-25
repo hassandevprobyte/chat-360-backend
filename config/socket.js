@@ -23,7 +23,7 @@ exports.createSocketServer = (httpServer) => {
     transports: ["websocket", "polling"],
   });
 
-  if (redis.isRedisEnabled()) {
+  if (!redis.isRedisDisabled()) {
     const pubClient = redis.getRedis("socket-pub");
     const subClient = redis.getRedis("socket-sub");
 

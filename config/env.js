@@ -13,6 +13,7 @@ const envSchema = Joi.object({
 
   REDIS_URL: Joi.string().uri().required(),
   REDIS_PREFIX: Joi.string().required(),
+  REDIS_DISABLED: Joi.boolean().truthy("true", "1").falsy("false", "0").default(false),
 
   JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
@@ -66,8 +67,9 @@ const env = {
   WIDGET_URL: envVars.WIDGET_URL,
   MONGODB_URI: envVars.MONGODB_URI,
   REDIS: {
-    URL: envVars.JWT_REDIS_URL,
-    PREFIX: envVars.JWT_REDIS_PREFIX,
+    URL: envVars.REDIS_URL,
+    PREFIX: envVars.REDIS_PREFIX,
+    DISABLED: envVars.REDIS_DISABLED,
   },
   JWT: {
     ACCESS_TOKEN_SECRET: envVars.JWT_ACCESS_TOKEN_SECRET,

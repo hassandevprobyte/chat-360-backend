@@ -28,7 +28,7 @@ exports.getQueue = (queueName) => {
     throw Boom.badRequest("Queue name is required");
   }
 
-  if (!redis.isRedisEnabled()) {
+  if (redis.isRedisDisabled()) {
     throw Boom.serverUnavailable("Redis is unavailable");
   }
 

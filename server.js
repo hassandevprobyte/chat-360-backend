@@ -1,55 +1,26 @@
 require("colors");
 const http = require("http");
-const express = require("express");
-const path = require("path");
-const helmet = require("helmet");
-const cors = require("cors");
-const mongoSanitize = require("express-mongo-sanitize");
-const cookieParser = require("cookie-parser");
-const compression = require("compression");
 
-const app = express();
-
-const { errorHandler } = require("./middleware/errorHandler");
+const createApp = require("./app");
 const bootstrap = require("./bootstrap");
-const { corsOptions, env } = require("./config");
+const env = require("./config/env");
 const backup = require("./config/backup");
-const pagination = require("./middleware/pagination");
-const requestLogger = require("./middleware/requestLogger");
 const initRealtime = require("./realtime");
 const shutdown = require("./common/utils/shutdown");
-
-// app.use(helmet());
-
-app.use(cors(corsOptions));
-
-app.use(compression());
-
-app.use(requestLogger);
-
-app.use(express.json({ limit: env.BODY.LIMIT }));
-app.use(express.urlencoded({ extended: true, limit: env.BODY.LIMIT }));
-
-app.use(cookieParser());
-
-app.use(mongoSanitize());
-
-app.use(pagination);
-app.use("/public", express.static(path.join(__dirname, "public")));
-app.use("/api/v1", require("./modules"));
-
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
-});
-
-app.use(errorHandler);
+const worker = require("./jobs/workers");
+const db = require("./config/db");
+const redis = require("./config/redis");
 
 const start = async () => {
+  await db.connectDB();
+  if (!redis.isRedisDisabled()) await redis.checkConnection();
+
+  worker.createWorkers();
+
   await bootstrap();
   backup();
+
+  const app = createApp();
 
   const server = http.createServer(app);
 

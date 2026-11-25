@@ -24,8 +24,8 @@ exports.getRedis = (connectionName = "default") => {
   return connection;
 };
 
-exports.isRedisEnabled = (connectionName = "default") => {
-  return exports.getRedis(connectionName).status === "ready";
+exports.isRedisDisabled = () => {
+  return env.REDIS.DISABLED;
 };
 
 exports.checkConnection = async (connectionName = "default") => {
