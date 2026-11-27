@@ -1,5 +1,19 @@
+const Boom = require("@hapi/boom");
+
+// Validations
+const widgetValidation = require("./widget.validation");
+const websiteValidation = require("../website/website.validation");
+const workspaceValidation = require("../workspace/workspace.validation");
+
 // Rnvironment Variables
 const env = require("../../config/env");
+
+// Common
+const { MESSAGE, STATUSES } = require("../../common/constants");
+
+// Utils
+const sanitize = require("../../common/utils/sanitize");
+const encryption = require("../../common/utils/encryption");
 
 exports.serializePublicWidgetConfig = (widget, { website, isOnline = false, agents = 0 } = {}) => {
   const settings = widget.settings || {};
@@ -71,4 +85,54 @@ exports.serializeWidget = (widget) => {
     createdAt: widget.createdAt,
     updatedAt: widget.updatedAt,
   };
+};
+
+exports.resolveByPublicKey = async (publicKey) => {
+  const widget = await widgetValidation.throwErrorIfWidgetPublicKeyDoesNotExist(publicKey);
+
+  if (encryption.decrypt(widget.publicKey) !== encryption.decrypt(publicKey)) {
+    throw Boom.conflict(MESSAGE.error.auth.forbidden);
+  }
+
+  if (!widget.isActive) {
+    throw Boom.conflict(MESSAGE.error.widget.inActive);
+  }
+
+  const [website, workspace] = await Promise.all([
+    workspaceValidation.throwErrorIfWorkspaceDoesNotExist(String(widget?.workspace?._id)),
+    websiteValidation.throwErrorIfWebsiteDoesNotExistInContextOfWorkspace(String(widget?.website?._id), String(widget?.workspace?._id)),
+  ]);
+
+  if (website.status !== STATUSES.WEBSITE.ACTIVE) {
+    throw Boom.conflict(MESSAGE.error.website.inActive);
+  }
+
+  if (workspace.status !== STATUSES.WEBSITE.ACTIVE) {
+    throw Boom.conflict(MESSAGE.error.workspace.currentStatus(workspace.status));
+  }
+
+  return { widget, website, workspace };
+};
+
+exports.resolveByIds = async ({ ws, site, wid }) => {
+  const [workspace, website, widget] = await Promise.all([
+    workspaceValidation.throwErrorIfWorkspaceDoesNotExist(ws),
+    websiteValidation.throwErrorIfWebsiteDoesNotExistInContextOfWorkspace(site, ws),
+    widgetValidation.throwErrorIfWidgetDoesNotExistInContextOfWorkspaceAndWebsite(wid, ws, site),
+  ]);
+
+  return { workspace, website, widget };
+};
+
+exports.requestOriginHost = (req) => {
+  const origin = req.get("origin") || req.get("referer") || "";
+  return origin ? sanitize.originToHost(origin) : null;
+};
+
+exports.assertOriginAllowed = async (website, req) => {
+  const origin = exports.requestOriginHost(req);
+
+  await websiteValidation.throeErrorIfAllowedDomainDoesNotExist(String(website._id), origin);
+
+  return origin;
 };

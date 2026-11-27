@@ -7,9 +7,12 @@ const env = require("../config/env");
 // Configs
 const redis = require("../config/redis");
 
+if (redis.isRedisDisabled()) {
+  console.log("Rate limiting is using the in-memory store because Redis is unavailable".bgYellow.black);
+}
+
 const buildStore = (prefix) => {
   if (redis.isRedisDisabled()) {
-    console.log("Rate limiting is using the in-memory store because Redis is unavailable".bgYellow.black);
     return undefined;
   }
 

@@ -1,5 +1,8 @@
 const User = require("./user.model");
 
+// Common
+const normalizers = require("../../common/normalizers");
+
 const POPULATION_PIPELINE = [];
 
 exports.getAllUsers = async (filters) => {
@@ -18,6 +21,12 @@ exports.getUserById = async (userId) => {
   return User.findById(userId, "-password").populate(POPULATION_PIPELINE).lean();
 };
 
+exports.getUsersByIds = async (userIds) => {
+  return User.find({ _id: { $in: normalizers.normalizeToArray(userIds) } })
+    .populate(POPULATION_PIPELINE)
+    .lean();
+};
+
 exports.getUserPasswordById = async (userId) => {
   const user = await User.findById(userId, "password");
 
@@ -30,10 +39,6 @@ exports.getUserByEmail = async (email) => {
 
 exports.getUserByRoleId = async (roleId) => {
   return User.findOne({ roles: roleId });
-};
-
-exports.getUsersByIds = async (userIds) => {
-  return User.find({ _id: { $in: userIds } });
 };
 
 exports.createUser = async (payload) => {

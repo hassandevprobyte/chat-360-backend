@@ -27,6 +27,16 @@ const createApp = () => {
 
   // Security
   app.use(helmet());
+  app.use(
+    "/api/v1/public",
+    cors({
+      origin: true,
+      credentials: false,
+      methods: ["GET", "POST", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Visitor-Token", "X-Request-Id"],
+      maxAge: 600,
+    }),
+  );
   app.use(cors(corsOptions));
   app.use(mongoSanitize());
 

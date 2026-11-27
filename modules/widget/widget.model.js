@@ -237,10 +237,6 @@ const schema = new mongoose.Schema(
       type: String,
       required: [true, "public key is required"],
     },
-    secretKey: {
-      type: String,
-      required: [true, "secret key is required"],
-    },
     isActive: {
       type: Boolean,
       default: true,

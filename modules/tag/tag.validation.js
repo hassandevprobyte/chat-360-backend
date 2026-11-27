@@ -6,8 +6,8 @@ const tagRepository = require("./tag.repository");
 // Constants
 const { MESSAGE: message } = require("../../common/constants");
 
-exports.throwErrorIfTagDoesNotExist = async (workspaceId, tagId) => {
-  const tag = await tagRepository.getTagById(workspaceId, tagId);
+exports.throwErrorIfTagDoesNotExistInContextOfWorkspace = async (tagId, workspaceId) => {
+  const tag = await tagRepository.getTagByIdAndWorkspaceId(tagId, workspaceId);
 
   if (!tag) {
     throw Boom.notFound(message.error.tag.notFound);
@@ -16,8 +16,8 @@ exports.throwErrorIfTagDoesNotExist = async (workspaceId, tagId) => {
   return tag;
 };
 
-exports.throwErrorIfTagTitleExists = async (workspaceId, title) => {
-  const tag = await tagRepository.getTagByTitle(workspaceId, title);
+exports.throwErrorIfTagTitleExistsInContextOfWorkspace = async (title, workspaceId) => {
+  const tag = await tagRepository.getTagByTitleAndWorkspaceId(title, workspaceId);
 
   if (tag) {
     throw Boom.notFound(message.error.tag.alreadyExists);

@@ -1,13 +1,13 @@
 const Boom = require("@hapi/boom");
 
 // Constants
-const { MESSAGE: message, PLATFORM_ROLES, WORKSPACE_ROLES, PERMISSIONS } = require("../common/constants");
+const { MESSAGE, PLATFORM_ROLES, WORKSPACE_ROLES, PERMISSIONS } = require("../common/constants");
 
 const requireWorkspaceAccess = (req, res, next) => {
   const { user, workspace } = req.context;
 
   if (!user || !workspace) {
-    throw Boom.badRequest(message.error.auth.forbidden);
+    throw Boom.badRequest(MESSAGE.error.auth.forbidden);
   }
 
   if (user.platformRole === PLATFORM_ROLES.SUPER_ADMIN) {
@@ -28,17 +28,17 @@ const requireWorkspaceAccess = (req, res, next) => {
     return next();
   }
 
-  const isAgent = workspace?.agents.find((agent) => String(agent?.user?._id) === String(user?._id));
-  if (isAgent) {
+  const agent = workspace?.agents.find((agent) => String(agent?.user?._id) === String(user?._id));
+  if (agent) {
     req.context.workspaceAccess = {
-      role: WORKSPACE_ROLES.AGENT,
-      permissions: PERMISSIONS.AGENT,
+      role: agent?.role,
+      permissions: PERMISSIONS[agent?.role?.toUpperCase()],
     };
 
     return next();
   }
 
-  throw Boom.forbidden(message.error.auth.forbidden);
+  throw Boom.forbidden(MESSAGE.error.auth.forbidden);
 };
 
 module.exports = requireWorkspaceAccess;

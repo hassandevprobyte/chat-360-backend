@@ -14,7 +14,11 @@ exports.getCannedResponseCount = async (filters) => {
   return CannedResponse.countDocuments(filters);
 };
 
-exports.getCannedResponseById = async (workspaceId, cannedResponseId) => {
+exports.getCannedResponseById = async (cannedResponseId) => {
+  return CannedResponse.findById(cannedResponseId).populate(POPULATION_PIPELINE).lean();
+};
+
+exports.getCannedResponseByIdAndWorkspaceId = async (cannedResponseId, workspaceId) => {
   return CannedResponse.findOne({ _id: cannedResponseId, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
 };
 
@@ -30,12 +34,12 @@ exports.getCannedResponseByWorkspaceIdAndUserId = async (workspaceId, userId) =>
   return CannedResponse.findOne({ workspace: workspaceId, user: userId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getCannedResponseByInContext = async (workspaceId, userId, cannedResposenId) => {
-  return CannedResponse.findOne({ workspace: workspaceId, user: userId, _id: cannedResposenId }).populate(POPULATION_PIPELINE).lean();
+exports.getCannedResponseByInContext = async (cannedResposenId, workspaceId, userId) => {
+  return CannedResponse.findOne({ _id: cannedResposenId, workspace: workspaceId, user: userId }).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getCannedResponseByShortcutInContext = async (workspaceId, userId, shortcut) => {
-  return CannedResponse.findOne({ workspace: workspaceId, user: userId, shortcut }).populate(POPULATION_PIPELINE).lean();
+exports.getCannedResponseByShortcutInContext = async (shortcut, workspaceId, userId) => {
+  return CannedResponse.findOne({ shortcut, workspace: workspaceId, user: userId }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.createCannedResponse = async (payload) => {

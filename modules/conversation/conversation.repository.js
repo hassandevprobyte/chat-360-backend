@@ -26,6 +26,10 @@ exports.getConversationById = async (conversationId) => {
   return Conversation.findById(conversationId).populate(POPULATION_PIPELINE).lean();
 };
 
+exports.getConversationByIdAndWorkspaceId = async (conversationId, workspaceId) => {
+  return Conversation.findOne({ _id: conversationId, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
+};
+
 exports.createConversation = async (payload) => {
   return Conversation.create(payload);
 };

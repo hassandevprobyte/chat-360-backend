@@ -1,7 +1,7 @@
 const Joi = require("../../config/joi");
 
 // Constants
-const { COLORS, CURRENCY, LOCALES, STATUSES, TIMEZONE, WORKSPACE } = require("../../common/constants");
+const { COLORS, CURRENCY, LOCALES, STATUSES, TIMEZONE, WORKSPACE, WORKSPACE_ROLES } = require("../../common/constants");
 
 // Environment Variables
 const { env } = require("../../config");
@@ -25,7 +25,10 @@ exports.baseSchema = Joi.object({
   agents: Joi.array()
     .items(
       Joi.object({
-        user: Joi.objectId(),
+        user: Joi.objectId().required(),
+        role: Joi.string()
+          .valid(...Object.values(WORKSPACE_ROLES))
+          .required(),
         assignedAt: Joi.date(),
       }),
     )

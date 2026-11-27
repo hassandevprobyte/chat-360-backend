@@ -19,8 +19,12 @@ const envSchema = Joi.object({
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
   JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
   JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().required(),
+  JWT_WIDGET_TOKEN_SECRET: Joi.string().required(),
+  JWT_WIDGET_TOKEN_EXPIRES_IN: Joi.string().required(),
 
   ENCRYPTION_KEY: Joi.string().required(),
+  ENCRYPTION_ALGORITHM: Joi.string().required(),
+  ENCRYPTION_IV_LENGTH: Joi.number().min(0).max(64).required(),
 
   OTP_SECRET: Joi.string().required(),
   OTP_LENGTH: Joi.number().integer().min(4).max(10).default(6),
@@ -76,8 +80,14 @@ const env = {
     ACCESS_TOKEN_EXPIRES_IN: envVars.JWT_ACCESS_TOKEN_EXPIRES_IN,
     REFRESH_TOKEN_SECRET: envVars.JWT_REFRESH_TOKEN_SECRET,
     REFRESH_TOKEN_EXPIRES_IN: envVars.JWT_REFRESH_TOKEN_EXPIRES_IN,
+    WIDGET_TOKEN_SECRET: envVars.JWT_WIDGET_TOKEN_SECRET,
+    WIDGET_TOKEN_EXPIRES_IN: envVars.JWT_WIDGET_TOKEN_EXPIRES_IN,
   },
-  ENCRYPTION_KEY: envVars.ENCRYPTION_KEY,
+  ENCRYPTION: {
+    KEY: envVars.ENCRYPTION_KEY,
+    ALGORITHM: envVars.ENCRYPTION_ALGORITHM,
+    IV_LENGTH: envVars.ENCRYPTION_IV_LENGTH,
+  },
   OTP: {
     SECRET: envVars.OTP_SECRET,
     LENGTH: envVars.OTP_LENGTH,

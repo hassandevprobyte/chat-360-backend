@@ -7,7 +7,9 @@ const visitorService = require("./visitor.service");
 // @route   GET /api/v1/visitors/all
 // @access  Private
 exports.getAllVisitors = asyncHandler(async (req, res) => {
-  const data = await visitorService.getAllVisitors(req.filters);
+  const filters = { ...req.filters, workspace: req.context?.workspace?._id };
+
+  const data = await visitorService.getAllVisitors(filters);
 
   res.status(200).json(data);
 });
@@ -17,7 +19,7 @@ exports.getAllVisitors = asyncHandler(async (req, res) => {
 // @access  Private
 exports.getVisitorsWithPagination = asyncHandler(async (req, res) => {
   const payload = {
-    filters: req.filters,
+    filters: { ...req.filters, workspace: req.context?.workspace?._id },
     page: req.pagination.page,
     pageSize: req.pagination.pageSize,
     sort: req.pagination.sort,
@@ -32,7 +34,12 @@ exports.getVisitorsWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/visitors/:id
 // @access  Private
 exports.getVisitorById = asyncHandler(async (req, res) => {
-  const data = await visitorService.getVisitorById(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await visitorService.getVisitorById(payload);
 
   res.status(200).json(data);
 });
@@ -42,10 +49,9 @@ exports.getVisitorById = asyncHandler(async (req, res) => {
 // @access  Private
 exports.createVisitor = asyncHandler(async (req, res) => {
   const payload = {
-    workspace: req.context?.workspaceId,
+    workspace: req.context?.workspace?._id || req.body.workspace,
     website: req.body.website,
     widget: req.body.widget,
-    anonymousId: req.body.anonymousId,
     title: req.body.title,
     email: req.body.email,
     phone: req.body.phone,
@@ -75,11 +81,10 @@ exports.createVisitor = asyncHandler(async (req, res) => {
 // @access  Private
 exports.updateVisitor = asyncHandler(async (req, res) => {
   const payload = {
+    workspace: req.context?.workspace?._id,
     id: req.params.id,
-    workspace: req.context?.workspaceId,
     website: req.body.website,
     widget: req.body.widget,
-    anonymousId: req.body.anonymousId,
     title: req.body.title,
     email: req.body.email,
     phone: req.body.phone,
@@ -108,7 +113,12 @@ exports.updateVisitor = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/visitors/:id
 // @access  Private
 exports.deleteVisitor = asyncHandler(async (req, res) => {
-  const data = await visitorService.deleteVisitor(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await visitorService.deleteVisitor(payload);
 
   res.status(200).json(data);
 });

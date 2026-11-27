@@ -1,11 +1,11 @@
 const crypto = require("crypto");
 
 // Environment variables
-const { env } = require("../../config");
+const env = require("../../config/env");
 
-const ENCRYPTION_KEY = Buffer.from(env.ENCRYPTION_KEY, "hex");
-const ALGORITHM = "aes-256-gcm";
-const IV_LENGTH = 12;
+const ENCRYPTION_KEY = Buffer.from(env.ENCRYPTION.KEY, "hex");
+const ALGORITHM = String(env.ENCRYPTION.ALGORITHM);
+const IV_LENGTH = Number(env.ENCRYPTION.IV_LENGTH);
 
 exports.encrypt = (plainText) => {
   if (plainText == null) return null;

@@ -24,7 +24,7 @@ const start = async () => {
 
   const server = http.createServer(app);
 
-  initRealtime(server);
+  await initRealtime(server);
 
   ["SIGINT", "SIGTERM", "unhandledRejection", "uncaughtException"].forEach((event) => {
     process.on(event, (err) => {

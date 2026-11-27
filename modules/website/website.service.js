@@ -24,10 +24,9 @@ exports.getWebsitesWithPagination = async (payload) => {
 };
 
 exports.getWebsiteById = async (payload) => {
-  console.log(payload);
   const validatedPayload = joi.validate(payload, joiSchema.getWebsiteById);
 
-  return websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  return websiteValidation.throwErrorIfWebsiteDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 };
 
 exports.createWebsite = async (payload) => {
@@ -41,7 +40,7 @@ exports.createWebsite = async (payload) => {
 exports.updateWebsite = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateWebsite);
 
-  const existingWebsite = await websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  const existingWebsite = await websiteValidation.throwErrorIfWebsiteDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existingWebsite?.title) {
@@ -100,7 +99,7 @@ exports.updateWebsite = async (payload) => {
 exports.deleteWebsite = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.getWebsiteById);
 
-  await websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  await websiteValidation.throwErrorIfWebsiteDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 
   await websiteRepository.deleteWebsiteById(validatedPayload.id);
 

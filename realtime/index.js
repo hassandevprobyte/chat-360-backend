@@ -2,9 +2,10 @@
 const { createSocketServer } = require("../config/socket");
 
 // Realtime
-const socketAuth = require("./socketAuth");
+const { socketAuth } = require("./auth");
+const emitters = require("./emitters");
 
-const initRealtime = (httpServer) => {
+const initRealtime = async (httpServer) => {
   const io = createSocketServer(httpServer);
   io.use(socketAuth);
 
@@ -15,6 +16,7 @@ const initRealtime = (httpServer) => {
     socket.on("error", (err) => console.log({ err, socketId: socket.id }, "Socket error".bgRed.black));
   });
 
+  await emitters.subscribeBridge();
   return io;
 };
 

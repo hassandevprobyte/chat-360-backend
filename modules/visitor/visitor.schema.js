@@ -1,12 +1,14 @@
 const Joi = require("../../config/joi");
 
-exports.getVisitorById = Joi.objectId().required();
+exports.getVisitorById = Joi.object({
+  workspace: Joi.objectId().required(),
+  id: Joi.objectId().required(),
+});
 
 exports.baseSchema = Joi.object({
   workspace: Joi.objectId(),
   website: Joi.objectId(),
   widget: Joi.objectId().allow(null),
-  anonymousId: Joi.string().trim().required(),
   title: Joi.string().trim().max(120).allow(null),
   email: Joi.string().trim().lowercase().email().max(254).allow(null),
   phone: Joi.string().trim().max(40).allow(null),
@@ -26,32 +28,6 @@ exports.baseSchema = Joi.object({
   metadata: Joi.object().unknown(true).default({}),
 });
 
-exports.createVisitor = exports.baseSchema
-  .fork(["workspace", "website", "anonymousId"], (schema) => schema.required())
-  .fork(
-    [
-      "widget",
-      "title",
-      "email",
-      "phone",
-      "isIdentified",
-      "currentPage",
-      "referrer",
-      "browser",
-      "operatingSystem",
-      "device",
-      "country",
-      "language",
-      "firstSeenAt",
-      "lastSeenAt",
-      "lastActiveAt",
-      "isOnline",
-      "sessionCount",
-    ],
-    (schema) => schema.strip(),
-  )
-  .fork("metadata", (schema) => schema.default({}));
+exports.createVisitor = exports.baseSchema.fork(["workspace", "website"], (schema) => schema.required()).fork("metadata", (schema) => schema.default({}));
 
-exports.updateVisitor = exports.baseSchema
-  .append({ id: Joi.objectId().required() })
-  .fork(["workspace", "website", "anonymousId", "widget", "isIdentified", "firstSeenAt", "lastSeenAt", "lastActiveAt", "isOnline", "sessionCount"], (schema) => schema.strip());
+exports.updateVisitor = exports.baseSchema.append({ id: Joi.objectId().required() });

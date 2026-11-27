@@ -3,13 +3,6 @@ const mongoose = require("mongoose");
 // Constants
 const { MODELS } = require("../../common/constants");
 
-/**
- * A Visitor is NOT a User. It is an anonymous (optionally identified) end user
- * of the customer's website, scoped to a workspace + website.
- *
- * Privacy: no raw IP is stored. Country comes from a trusted edge header only,
- * and only when the website enables it.
- */
 const schema = new mongoose.Schema(
   {
     workspace: {

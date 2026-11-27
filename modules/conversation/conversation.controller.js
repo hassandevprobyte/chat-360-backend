@@ -7,7 +7,9 @@ const conversationService = require("./conversation.service");
 // @route   GET /api/v1/conversations/all
 // @access  Private
 exports.getAllConversations = asyncHandler(async (req, res) => {
-  const data = await conversationService.getAllConversations(req.filters);
+  const filters = { ...req.filters, workspace: req.context?.workspace?._id };
+
+  const data = await conversationService.getAllConversations(filters);
 
   res.status(200).json(data);
 });
@@ -17,7 +19,7 @@ exports.getAllConversations = asyncHandler(async (req, res) => {
 // @access  Private
 exports.getConversationsWithPagination = asyncHandler(async (req, res) => {
   const payload = {
-    filters: req.filters,
+    filters: { ...req.filters, workspace: req.context?.workspace?._id },
     page: req.pagination.page,
     pageSize: req.pagination.pageSize,
     sort: req.pagination.sort,
@@ -32,7 +34,12 @@ exports.getConversationsWithPagination = asyncHandler(async (req, res) => {
 // @route   GET /api/v1/conversations/:id
 // @access  Private
 exports.getConversationById = asyncHandler(async (req, res) => {
-  const data = await conversationService.getConversationById(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await conversationService.getConversationById(payload);
 
   res.status(200).json(data);
 });
@@ -114,7 +121,12 @@ exports.updateConversation = asyncHandler(async (req, res) => {
 // @route   DELETE /api/v1/conversations/:id
 // @access  Private
 exports.deleteConversation = asyncHandler(async (req, res) => {
-  const data = await conversationService.deleteConversation(req.params.id);
+  const payload = {
+    workspace: req.context?.workspace?._id,
+    id: req.params.id,
+  };
+
+  const data = await conversationService.deleteConversation(payload);
 
   res.status(200).json(data);
 });

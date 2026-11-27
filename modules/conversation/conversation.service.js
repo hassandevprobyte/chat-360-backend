@@ -28,10 +28,10 @@ exports.getConversationsWithPagination = async (payload) => {
   return { data: conversations, meta };
 };
 
-exports.getConversationById = async (conversationId) => {
-  joi.validate(conversationId, joiSchema.getConversationById);
+exports.getConversationById = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getConversationById);
 
-  return conversationValidation.throwErrorIfConversationDoesNotExist(conversationId);
+  return conversationValidation.throwErrorIfConversationDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 };
 
 exports.createConversation = async (payload) => {
@@ -48,7 +48,7 @@ exports.createConversation = async (payload) => {
 exports.updateConversation = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateConversation);
 
-  const existingConversation = await conversationValidation.throwErrorIfConversationDoesNotExist(validatedPayload.id);
+  const existingConversation = await conversationValidation.throwErrorIfConversationDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existingConversation?.title) {
@@ -104,12 +104,12 @@ exports.updateConversation = async (payload) => {
   return conversationRepository.updateConversationById(validatedPayload.id, updatePayload);
 };
 
-exports.deleteConversation = async (conversationId) => {
-  joi.validate(conversationId, joiSchema.getConversationById);
+exports.deleteConversation = async (payload) => {
+  const validatedPayload = joi.validate(payload, joiSchema.getConversationById);
 
-  await conversationValidation.throwErrorIfConversationDoesNotExist(conversationId);
+  await conversationValidation.throwErrorIfConversationDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 
-  await conversationRepository.deleteConversationById(conversationId);
+  await conversationRepository.deleteConversationById(validatedPayload.id);
 
-  return { deletedId: conversationId };
+  return { deletedId: validatedPayload.id };
 };

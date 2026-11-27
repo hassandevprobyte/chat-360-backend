@@ -12,6 +12,7 @@ const workspaceValidation = require("../workspace/workspace.validation");
 
 // Common
 const generators = require("../../common/generators");
+const encryption = require("../../common/utils/encryption");
 
 exports.getAllWidgets = async (filters) => {
   return widgetRepository.getAllWidgets(filters);
@@ -31,7 +32,7 @@ exports.getWidgetsWithPagination = async (payload) => {
 exports.getWidgetById = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.getWidgetById);
 
-  return widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  return widgetValidation.throwErrorIfWidgetDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 };
 
 exports.createWidget = async (payload) => {
@@ -39,15 +40,15 @@ exports.createWidget = async (payload) => {
 
   await Promise.all([
     workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    websiteValidation.throwErrorIfWebsiteDoesNotExist(validatedPayload.workspace, validatedPayload.website),
+    websiteValidation.throwErrorIfWebsiteDoesNotExistInContextOfWorkspace(validatedPayload.website, validatedPayload.workspace),
   ]);
 
   if (validatedPayload.isActive === true) {
     await widgetRepository.deactivateAllWidgets(validatedPayload.workspace, validatedPayload.website);
   }
 
-  validatedPayload.publicKey = generators.generateRandomToken({ prefix: "pk", bytes: 16, encoding: "base64url" });
-  validatedPayload.secretKey = generators.generateRandomToken({ prefix: "sk", bytes: 48, encoding: "base64url" });
+  const publicKey = generators.generateRandomToken({ prefix: "pk", bytes: 128, encoding: "base64url" });
+  validatedPayload.publicKey = encryption.encrypt(publicKey);
 
   return widgetRepository.createWidget(validatedPayload);
 };
@@ -55,7 +56,7 @@ exports.createWidget = async (payload) => {
 exports.updateWidget = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateWidget);
 
-  const existingWidget = await widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  const existingWidget = await widgetValidation.throwErrorIfWidgetDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existingWidget?.title) {
@@ -81,7 +82,7 @@ exports.updateWidget = async (payload) => {
 exports.deleteWidget = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.getWidgetById);
 
-  await widgetValidation.throwErrorIfWidgetDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  await widgetValidation.throwErrorIfWidgetDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 
   await widgetRepository.deleteWidgetById(validatedPayload.id);
 

@@ -14,12 +14,20 @@ exports.getWidgetsCount = async (filters) => {
   return Widget.countDocuments(filters);
 };
 
-exports.getWidgetById = async (workspaceId, widgetId) => {
-  return Widget.findOne({ workspace: workspaceId, _id: widgetId }).populate(POPULATION_PIPELINE).lean();
+exports.getWidgetById = async (widgetId) => {
+  return Widget.findById(widgetId).populate(POPULATION_PIPELINE).lean();
 };
 
-exports.getWidgetByDomainAndWorkspaceId = async (domain, workspaceId) => {
-  return Widget.findOne({ domain, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
+exports.getWidgetByIdAndWorkspaceId = async (widgetId, workspaceId) => {
+  return Widget.findOne({ _id: widgetId, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
+};
+
+exports.getWidgetByPublicKey = async (publicKey) => {
+  return Widget.findOne({ publicKey }).populate(POPULATION_PIPELINE).lean();
+};
+
+exports.getWidgetInContextOfWorkspaceAndWebsite = async (widgetId, workspaceId, websiteId) => {
+  return Widget.findOne({ _id: widgetId, workspace: workspaceId, website: websiteId }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.deactivateAllWidgets = async (workspaceId, websiteId) => {

@@ -8,8 +8,8 @@ const { CANNED_RESPONSE, MESSAGE: message } = require("../../common/constants");
 
 exports.MAX_SHORTCUTS_PER_USER = 300;
 
-exports.throwErrorIfCannedResponseDoesNotExist = async (workspaceId, cannedResponseId) => {
-  const cannedResponse = await cannedResponseRepository.getCannedResponseById(workspaceId, cannedResponseId);
+exports.throwErrorIfCannedResponseDoesNotExistInContextOfWorkspace = async (cannedResponseId, workspaceId) => {
+  const cannedResponse = await cannedResponseRepository.getCannedResponseByIdAndWorkspaceId(cannedResponseId, workspaceId);
 
   if (!cannedResponse) {
     throw Boom.notFound(message.error.cannedResponse.notFound);
@@ -18,16 +18,8 @@ exports.throwErrorIfCannedResponseDoesNotExist = async (workspaceId, cannedRespo
   return cannedResponse;
 };
 
-exports.throwErrorIfCannedResponseExists = async (workspaceId, cannedResponseId) => {
-  const cannedResponse = await cannedResponseRepository.getCannedResponseById(workspaceId, cannedResponseId);
-
-  if (cannedResponse) {
-    throw Boom.notFound(message.error.cannedResponse.alreadyExists);
-  }
-};
-
-exports.throwErrorIfCannedResponseDoesNotExistInContext = async (workspaceId, userId, cannedResponseId) => {
-  const cannedResponse = await cannedResponseRepository.getCannedResponseByInContext(workspaceId, userId, cannedResponseId);
+exports.throwErrorIfCannedResponseDoesNotExistInContext = async (cannedResponseId, workspaceId, userId) => {
+  const cannedResponse = await cannedResponseRepository.getCannedResponseByInContext(cannedResponseId, workspaceId, userId);
 
   if (!cannedResponse) {
     throw Boom.notFound(message.error.cannedResponse.notFound);
@@ -36,16 +28,16 @@ exports.throwErrorIfCannedResponseDoesNotExistInContext = async (workspaceId, us
   return cannedResponse;
 };
 
-exports.throwErrorIfCannedResponseShortcutExistsInContext = async (workspaceId, userId, shortcut) => {
-  const cannedResponse = await cannedResponseRepository.getCannedResponseByShortcutInContext(workspaceId, userId, shortcut);
+exports.throwErrorIfCannedResponseShortcutExistsInContext = async (shortcut, workspaceId, userId) => {
+  const cannedResponse = await cannedResponseRepository.getCannedResponseByShortcutInContext(shortcut, workspaceId, userId);
 
   if (cannedResponse) {
     throw Boom.notFound(message.error.cannedResponse.alreadyExists);
   }
 };
 
-exports.throwErrorIfMaximumNumberOfCannedResponsesReached = async (workspaceId, userId) => {
-  const cannedResponse = await cannedResponseRepository.getCannedResponseCount({ workspace: workspaceId, user: userId });
+exports.throwErrorIfMaximumNumberOfCannedResponsesReachedForUserInContextOfWorkspace = async (userId, workspaceId) => {
+  const cannedResponse = await cannedResponseRepository.getCannedResponseCount({ user: userId, workspace: workspaceId });
 
   if (cannedResponse >= CANNED_RESPONSE.MAX_PER_USER) {
     throw Boom.badRequest(message.error.cannedResponse.maxPerUser);

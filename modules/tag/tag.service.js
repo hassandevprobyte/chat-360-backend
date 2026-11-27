@@ -27,7 +27,7 @@ exports.getTagsWithPagination = async (payload) => {
 exports.getTagById = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.getTagById);
 
-  return tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  return tagValidation.throwErrorIfTagDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 };
 
 exports.createTag = async (payload) => {
@@ -35,7 +35,7 @@ exports.createTag = async (payload) => {
 
   await Promise.all([
     workspaceValidation.throwErrorIfWorkspaceDoesNotExist(validatedPayload.workspace),
-    tagValidation.throwErrorIfTagTitleExists(validatedPayload.workspace, validatedPayload.title),
+    tagValidation.throwErrorIfTagTitleExistsInContextOfWorkspace(validatedPayload.title, validatedPayload.workspace),
   ]);
 
   validatedPayload.titleKey = `#${validatedPayload.title}`;
@@ -46,11 +46,11 @@ exports.createTag = async (payload) => {
 exports.updateTag = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.updateTag);
 
-  const existinhTag = await tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  const existinhTag = await tagValidation.throwErrorIfTagDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
   const updatePayload = {};
 
   if (validatedPayload.title && validatedPayload.title !== existinhTag?.title) {
-    await tagValidation.throwErrorIfTagTitleExists(String(existinhTag?.workspace?._id), validatedPayload.title);
+    await tagValidation.throwErrorIfTagTitleExistsInContextOfWorkspace(validatedPayload.title, String(existinhTag?.workspace?._id));
     updatePayload.title = validatedPayload.title;
     updatePayload.titleKey = `#${validatedPayload.title}`;
   }
@@ -79,7 +79,7 @@ exports.updateTag = async (payload) => {
 exports.deleteTag = async (payload) => {
   const validatedPayload = joi.validate(payload, joiSchema.getTagById);
 
-  await tagValidation.throwErrorIfTagDoesNotExist(validatedPayload.workspace, validatedPayload.id);
+  await tagValidation.throwErrorIfTagDoesNotExistInContextOfWorkspace(validatedPayload.id, validatedPayload.workspace);
 
   await tagRepository.deleteTagById(validatedPayload.id);
 

@@ -66,19 +66,17 @@ exports.PERMISSIONS = Object.freeze({
     [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
   },
   AGENT: {
-    [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.ATTACHMENT]: ["CREATE", "READ", "UPDATE"],
     [exports.MODELS.AUDIT_LOG]: ["CREATE", "READ", "UPDATE", "DELETE"],
     [exports.MODELS.CANNED_RESPONSE]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.CONVERSATION]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.CONVERSATION]: ["CREATE", "READ", "UPDATE"],
     [exports.MODELS.MESSAGE]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.PICKLIST]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.ROLE]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.TAG]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.USER]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.VISITOR]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.WEBSITE]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE", "DELETE"],
-    [exports.MODELS.WORKSPACE]: ["CREATE", "READ", "UPDATE", "DELETE"],
+    [exports.MODELS.TAG]: ["CREATE", "READ", "UPDATE"],
+    [exports.MODELS.USER]: ["READ"],
+    [exports.MODELS.VISITOR]: ["CREATE", "READ", "UPDATE"],
+    [exports.MODELS.WEBSITE]: ["CREATE", "READ", "UPDATE"],
+    [exports.MODELS.WIDGET]: ["CREATE", "READ", "UPDATE"],
+    [exports.MODELS.WORKSPACE]: ["READ"],
   },
   VIEWER: {
     [exports.MODELS.ATTACHMENT]: ["READ"],
@@ -207,9 +205,12 @@ exports.MESSAGE = Object.freeze({
     website: {
       notFound: "website not found",
       domainExists: "website domain already exists",
+      inActive: "website is inactive",
+      allowedDomainNotFound: "website allowed domain not found",
     },
     widget: {
       notFound: "widget not found",
+      inActive: "widget is inactive",
     },
     workspace: {
       notFound: "Workspace not found",
@@ -661,6 +662,7 @@ exports.TYPES = Object.freeze({
     "application/vnd.ms-powerpoint": [".ppt"],
     "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
   },
+  SOCKET: { DASHBOARD: "dashboard", WIDGET: "widget" },
 });
 
 exports.LOCALES = Object.freeze({
@@ -729,14 +731,12 @@ exports.SCOPE = Object.freeze({
 });
 
 exports.STATUSES = Object.freeze({
-  VEHICLE: { ASSIGNED: "assigned", IN_MAINTENANCE: "in_maintenance", IN_HOUSE: "in_house" },
-  INSURANCE: { ACTIVE: "active", EXPIRED: "expired", CANCELLED: "cancelled" },
-  MAINTENANCE: { INITIATED: "initiated", COMPLETED: "completed" },
   WORKSPACE: { ACTIVE: "active", ARCHIVED: "archived", SUSPENDED: "suspended" },
   USER: { ACTIVE: "active", BLOCKED: "blocked", SUSPENDED: "suspended" },
   CONVERSATION: { OPEN: "open", PENDING: "pending", CLOSED: "closed" },
   WEBSITE: { ACTIVE: "active", INACTIVE: "inactive", PENDING: "pending" },
   VERIFICATION: { UNVERIFIED: "unverified", PENDING: "pending", VERIFIED: "verified", FAILED: "failed" },
+  PRESENCE: { ONLINE: "online", AWAY: "away", OFFLINE: "offline" },
 });
 
 exports.WIDGET = Object.freeze({

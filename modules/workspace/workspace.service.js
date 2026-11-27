@@ -10,6 +10,7 @@ const workspaceRepository = require("./workspace.repository");
 const joi = require("../../config/joi");
 const joiSchema = require("./workspace.schema");
 const workspaceValidation = require("./workspace.validation");
+const userValidation = require("../user/user.validation");
 
 // Helpers
 const attachmentHelpers = require("../attachment/attachment.helper");
@@ -52,6 +53,11 @@ exports.createWorkspace = async (payload, attachmentPayload = {}) => {
     const validatedPayload = joi.validate(payload, joiSchema.createWorkspace);
 
     await workspaceValidation.throwErrorIfWorkspaceUserExists(validatedPayload.user);
+
+    if (validatedPayload.agents) {
+      const agentIds = validatedPayload.agents.map((agent) => agent.id);
+      await userValidation.throwErrorIfAnyUserDoesNotExist(agentIds);
+    }
 
     validatedPayload.slug = workspaceHelpers.generateWorkspaceSlug(env.WORKSPACE.SLUG_LENGTH);
 
@@ -114,6 +120,9 @@ exports.updateWorkspace = async (payload, attachmentPayload = {}) => {
     }
 
     if (validatedPayload.agents && !lodash.isEqual(validatedPayload.agents, existingWorkspace?.agents)) {
+      const agentIds = validatedPayload.agents.map((agent) => agent.user) || [];
+      await userValidation.throwErrorIfAnyUserDoesNotExist(agentIds);
+
       updatePayload.agents = validatedPayload.agents;
     }
 

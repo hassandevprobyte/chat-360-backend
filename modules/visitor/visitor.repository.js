@@ -18,8 +18,20 @@ exports.getVisitorById = async (visitorId) => {
   return Visitor.findById(visitorId).populate(POPULATION_PIPELINE).lean();
 };
 
+exports.getVisitorByIdAndWorkspaceId = async (visitorId, workspaceId) => {
+  return Visitor.findOne({ _id: visitorId, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
+};
+
+exports.getVisitorByWorkspaceIdAndAnonymousId = async (workspaceId, anonymousId) => {
+  return Visitor.findOne({ workspace: workspaceId, anonymousId }).populate(POPULATION_PIPELINE).lean();
+};
+
 exports.createVisitor = async (payload) => {
   return Visitor.create(payload);
+};
+
+exports.upsertVisitor = async (workspaceId, anonymousId, payload) => {
+  return Visitor.findOneAndUpdate({ workspace: workspaceId, anonymousId }, payload, { upsert: true, returnDocument: "after" });
 };
 
 exports.updateVisitorById = async (visitorId, payload) => {

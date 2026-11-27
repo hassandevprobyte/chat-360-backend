@@ -14,8 +14,12 @@ exports.getTagsCount = async (filters) => {
   return Tag.countDocuments(filters);
 };
 
-exports.getTagById = async (workspaceId, tagId) => {
-  return Tag.findOne({ workspace: workspaceId, _id: tagId }).populate(POPULATION_PIPELINE).lean();
+exports.getTagById = async (tagId) => {
+  return Tag.findById(tagId).populate(POPULATION_PIPELINE).lean();
+};
+
+exports.getTagByIdAndWorkspaceId = async (tagId, workspaceId) => {
+  return Tag.findOne({ _id: tagId, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.getTagByWorkspaceId = async (workspaceId) => {
@@ -24,6 +28,10 @@ exports.getTagByWorkspaceId = async (workspaceId) => {
 
 exports.getTagByTitle = async (workspaceId, title) => {
   return Tag.findOne({ workspace: workspaceId, title }).populate(POPULATION_PIPELINE).lean();
+};
+
+exports.getTagByTitleAndWorkspaceId = async (title, workspaceId) => {
+  return Tag.findOne({ title, workspace: workspaceId }).populate(POPULATION_PIPELINE).lean();
 };
 
 exports.createTag = async (payload) => {

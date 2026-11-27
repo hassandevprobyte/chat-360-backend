@@ -3,7 +3,10 @@ const Joi = require("../../config/joi");
 // Constants
 const { CONVERSATION_PRIORITY, STATUSES } = require("../../common/constants");
 
-exports.getConversationById = Joi.objectId().required();
+exports.getConversationById = Joi.object({
+  workspace: Joi.objectId().required(),
+  id: Joi.objectId().required(),
+});
 
 exports.baseSchema = Joi.object({
   workspace: Joi.objectId(),
